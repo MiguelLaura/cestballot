@@ -17,7 +17,7 @@ func generateCombinations(alts []Alternative) chan []Alternative {
 }
 
 func CondorcetWinner(p Profile) (bestAlts []Alternative, err error) {
-	if err = checkProfile(p); err != nil {
+	if err = checkProfileAlternative(p, p[0]); err != nil {
 		return
 	}
 

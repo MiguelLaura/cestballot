@@ -1,7 +1,7 @@
 package comsoc
 
 func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
-	if err = checkProfile(p); err != nil || len(thresholds) != len(p) {
+	if err = checkProfileAlternative(p, p[0]); err != nil || len(thresholds) != len(p) {
 		return
 	}
 

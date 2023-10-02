@@ -51,7 +51,8 @@ func TestMaxCount(t *testing.T) {
 	}
 }
 
-func TestCheckProfile(t *testing.T) {
+func TestCheckProfileAlternative(t *testing.T) {
+	alts := []Alternative{3, 2, 1}
 	profile1 := Profile{
 		[]Alternative{1, 2, 3},
 		[]Alternative{3, 1, 2},
@@ -76,19 +77,19 @@ func TestCheckProfile(t *testing.T) {
 		[]Alternative{2, 1},
 	}
 
-	if checkProfile(profile1) != nil {
+	if checkProfileAlternative(profile1, alts) != nil {
 		t.Errorf("Should be a correct profile")
 	}
 
-	if checkProfile(profile2) == nil {
+	if checkProfileAlternative(profile2, alts) == nil {
 		t.Errorf("Should not be correct (two times the same alternative)")
 	}
 
-	if checkProfile(profile3) == nil {
+	if checkProfileAlternative(profile3, alts) == nil {
 		t.Errorf("Should not be correct (one more alternative)")
 	}
 
-	if checkProfile(profile4) == nil {
+	if checkProfileAlternative(profile4, alts) == nil {
 		t.Errorf("Should not be correct (one alternative is missing)")
 	}
 }

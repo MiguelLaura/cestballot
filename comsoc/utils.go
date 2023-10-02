@@ -73,16 +73,53 @@ func equals(pref1 []Alternative, pref2 []Alternative) bool {
 }
 
 // vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois par préférences
-func checkProfile(prefs Profile) error {
+/* func checkProfile(prefs Profile) error {
 	if len(prefs) == 0 {
 		return nil
 	}
 
 	return checkProfileAlternative(prefs[1:], prefs[0])
+} */
+
+// vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparait qu'une seule fois
+func checkProfile(prefs []Alternative, alts []Alternative) error {
+	if len(prefs) == 0 && len(alts) == 0 {
+		return nil
+	}
+
+	// Checks if the current individual has two identical individuals
+	if checkDoublons(prefs) {
+		return errors.New("two same alternatives found for the same individual")
+	}
+
+	// Checks if the current individual does not have the same alternatives as the others
+	if !equals(alts, prefs) {
+		return errors.New("at least one alternative does not exist in the preferences")
+	}
+
+	return nil
 }
 
 // vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
 func checkProfileAlternative(prefs Profile, alts []Alternative) error {
+
+	// Checks if there are two times the same alternative in the alts slice
+	if checkDoublons(alts) {
+		return errors.New("two same alternatives found in the alts slice")
+	}
+
+	// Checks for the other individuals
+	for indiv := 0; indiv < len(prefs); indiv++ {
+		if err := checkProfile(prefs[indiv], alts); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
+/* func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 	if len(prefs) == 0 {
 		return nil
 	}
@@ -110,4 +147,4 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 	}
 
 	return nil
-}
+} */
