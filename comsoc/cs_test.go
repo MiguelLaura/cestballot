@@ -145,3 +145,28 @@ func TestCondorcetWinner(t *testing.T) {
 		t.Errorf("no best alternative for prefs2")
 	}
 }
+
+func TestSTV_SCF(t *testing.T) {
+	prefs := Profile{
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+
+		{4, 3, 1, 2},
+		{4, 3, 1, 2},
+		{4, 3, 1, 2},
+	}
+
+	res, _ := STV_SCF(prefs)
+
+	if len(res) != 1 || res[0] != 1 {
+		t.Errorf("error, 1 should be the only best alternative")
+	}
+}
