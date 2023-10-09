@@ -74,9 +74,9 @@ func (agent *VoterAgent) Start() {
 		vote := comsoc.Alternative(theFinalVote)
 
 		if vote == agent.Prefs[0] || agent.Prefers(vote, agent.Prefs[0]) {
-			log.Printf("%s est content du vote !! 😃", agent.String())
+			log.Printf("%s est content.e du vote !! 😃", agent.String())
 		} else {
-			log.Printf("%s est déçu du vote !! 😢", agent.String())
+			log.Printf("%s est déçu.e du vote !! 😢", agent.String())
 		}
 	}()
 }
