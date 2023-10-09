@@ -47,7 +47,7 @@ func (rst *RestServerAgent) genBallotAgentId() string {
 	----------------------------------------
 */
 
-func (*RestServerAgent) decodeNewBalloRequest(r *http.Request) (req NewBallotRequest, err error) {
+func (*RestServerAgent) decodeNewBallotRequest(r *http.Request) (req NewBallotRequest, err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
@@ -65,7 +65,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	req, err := rst.decodeNewBalloRequest(r)
+	req, err := rst.decodeNewBallotRequest(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "JSON request string incorrect format")
