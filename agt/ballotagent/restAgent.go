@@ -25,9 +25,7 @@ func NewRestBallotAgent(id string,
 	voters []string,
 	nbAlts int,
 ) (*RestBallotAgent, error) {
-	timeExample := "Tue Nov 10 23:00:00 UTC 2009"
-
-	deadlineTime, err := time.Parse(timeExample, deadline)
+	deadlineTime, err := time.Parse(time.UnixDate, deadline)
 	if err != nil {
 		return nil, errors.New("400::error while parsing date : " + deadline)
 	}
