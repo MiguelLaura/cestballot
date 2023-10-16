@@ -17,9 +17,10 @@ type RestServerAgent struct {
 	id       string
 	nbBallot int
 	addr     string
+	ballots  map[string]*ba.RestBallotAgent
 }
 
-// Test de la méthode
+// Test du verbe HTTP utilisé
 func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != method {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -30,7 +31,9 @@ func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r 
 }
 
 func NewRestServerAgent(id string, addr string) *RestServerAgent {
-	return &RestServerAgent{id: id, addr: addr}
+	rst := RestServerAgent{id: id, addr: addr}
+	rst.ballots = make(map[string]*ba.RestBallotAgent)
+	return &rst
 }
 
 func (rst *RestServerAgent) genBallotAgentId() string {
@@ -62,6 +65,7 @@ func decodeRequest[T any](r *http.Request, req *T) (err error) {
 
 func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
+		log.Println("doNewBallot : request is not of type POST")
 		return
 	}
 
@@ -69,24 +73,29 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 
 	err := decodeRequest(r, &req)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "JSON request string incorrect format")
 		return
 	}
 
+	newBallotId := rst.genBallotAgentId()
+
 	theNewBallot, err := ba.NewRestBallotAgent(
-		rst.genBallotAgentId(),
+		newBallotId,
 		req.Rule,
 		req.Deadline,
 		req.Voters,
 		req.Alts,
+		req.TieBreak,
 	)
 
 	if err != nil {
+		log.Println("Ballot newBallotId : " + err.Error())
 		switch strings.Split(err.Error(), "::")[0] {
 		case "400":
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "JSON date string incorrect format")
+			fmt.Fprint(w, "JSON incorrect content")
 		case "501":
 			w.WriteHeader(http.StatusNotImplemented)
 			fmt.Fprintf(w, "vote method %q not supported", req.Rule)
@@ -96,9 +105,13 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 
 	err = theNewBallot.Start()
 	if err != nil {
+		log.Println("Ballot newBallotId : " + err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "The deadline is in the past")
+		return
 	}
+
+	rst.ballots[theNewBallot.ID] = theNewBallot
 
 	var resp NewBallotResponse
 	resp.Id = theNewBallot.ID

@@ -1,10 +1,12 @@
 package ballotagent
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"ia04/comsoc"
 	"ia04/utils/concurrent"
+	"log"
 	"strings"
 	"time"
 )
@@ -15,7 +17,7 @@ type RestBallotAgent struct {
 	Deadline time.Time
 	Voters   []string
 	NbAlts   int
-	opened   bool
+	Ctx      context.Context
 	scf      func(comsoc.Profile) (comsoc.Alternative, error)
 }
 
@@ -24,15 +26,29 @@ func NewRestBallotAgent(id string,
 	deadline string,
 	voters []string,
 	nbAlts int,
+	tieBreaks []comsoc.Alternative,
 ) (*RestBallotAgent, error) {
-	deadlineTime, err := time.Parse(time.UnixDate, deadline)
+	deadlineTime, err := time.Parse(time.RFC3339, deadline)
 	if err != nil {
 		return nil, errors.New("400::error while parsing date : " + deadline)
 	}
 
-	allAlts := make([]comsoc.Alternative, nbAlts)
-	for idx := range allAlts {
-		allAlts[idx] = comsoc.Alternative(idx + 1)
+	// Check number of alternatives
+	if len(tieBreaks) != nbAlts {
+		return nil, errors.New("400::error not the same number of alternatives in nbAlts and tieBreaks")
+	}
+
+	// Check if tieBreaks has the right values
+	valueCheck := make([]comsoc.Alternative, nbAlts)
+	for _, tbv := range tieBreaks {
+		if tbv < 1 || tbv > comsoc.Alternative(nbAlts) {
+			return nil, errors.New("400::error one value in the tieBreaks is not between 1 and nbAlts")
+		}
+		if valueCheck[tbv-1] > 0 {
+			return nil, errors.New("400::error theres two times the same value in tieBreaks")
+		}
+
+		valueCheck[tbv-1]++
 	}
 
 	var chosenSCF func(comsoc.Profile) ([]comsoc.Alternative, error) = nil
@@ -48,7 +64,9 @@ func NewRestBallotAgent(id string,
 		return nil, errors.New("501::" + voteType + " not supported")
 	}
 
-	return &RestBallotAgent{id, voteType, deadlineTime, voters, nbAlts, false, comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(allAlts))}, nil
+	ctx := context.Background()
+
+	return &RestBallotAgent{id, voteType, deadlineTime, voters, nbAlts, ctx, comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(tieBreaks))}, nil
 }
 
 func (agent *RestBallotAgent) Equal(agent2 RestBallotAgent) bool {
@@ -64,17 +82,19 @@ func (agent *RestBallotAgent) String() string {
 }
 
 func (agent *RestBallotAgent) Start() error {
-	timeout := agent.Deadline.Sub(time.Now())
-	if timeout < 0 {
+	tnow := time.Now()
+
+	if tnow.After(agent.Deadline) {
 		return errors.New("the ballot deadline is set before now")
 	}
 
 	go func() {
-		agent.opened = true
+		ctx, cancelCtx := context.WithDeadline(agent.Ctx, agent.Deadline)
+		agent.Ctx = ctx
+		defer cancelCtx()
 
-		<-time.After(timeout)
-
-		agent.opened = false
+		<-ctx.Done()
+		log.Println(agent.ID, "Vote closed")
 	}()
 
 	return nil
