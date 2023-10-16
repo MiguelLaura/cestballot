@@ -82,7 +82,7 @@ func equals(pref1 []Alternative, pref2 []Alternative) bool {
 } */
 
 // vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparait qu'une seule fois
-func checkProfile(prefs []Alternative, alts []Alternative) error {
+func CheckProfile(prefs []Alternative, alts []Alternative) error {
 	if len(prefs) == 0 && len(alts) == 0 {
 		return nil
 	}
@@ -110,7 +110,7 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 
 	// Checks for the other individuals
 	for indiv := 0; indiv < len(prefs); indiv++ {
-		if err := checkProfile(prefs[indiv], alts); err != nil {
+		if err := CheckProfile(prefs[indiv], alts); err != nil {
 			return err
 		}
 	}

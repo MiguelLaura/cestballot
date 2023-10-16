@@ -5,20 +5,20 @@ import (
 	"errors"
 	"fmt"
 	"ia04/comsoc"
-	"ia04/utils/concurrent"
 	"log"
 	"strings"
 	"time"
 )
 
 type RestBallotAgent struct {
-	ID       string
-	Type     string
-	Deadline time.Time
-	Voters   []string
-	NbAlts   int
-	Ctx      context.Context
-	scf      func(comsoc.Profile) (comsoc.Alternative, error)
+	ID         string
+	Type       string
+	Deadline   time.Time
+	Voters     map[string][]comsoc.Alternative
+	VotersOpts map[string][]int
+	NbAlts     int
+	Ctx        context.Context
+	scf        func(comsoc.Profile) (comsoc.Alternative, error)
 }
 
 func NewRestBallotAgent(id string,
@@ -64,21 +64,57 @@ func NewRestBallotAgent(id string,
 		return nil, errors.New("501::" + voteType + " not supported")
 	}
 
+	theVoters := make(map[string][]comsoc.Alternative)
+	for _, voter := range voters {
+		theVoters[voter] = nil
+	}
+
 	ctx := context.Background()
 
-	return &RestBallotAgent{id, voteType, deadlineTime, voters, nbAlts, ctx, comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(tieBreaks))}, nil
-}
-
-func (agent *RestBallotAgent) Equal(agent2 RestBallotAgent) bool {
-	return agent.ID == agent2.ID && agent.Type == agent2.Type && agent.Deadline == agent2.Deadline && agent.NbAlts == agent2.NbAlts
-}
-
-func (agent *RestBallotAgent) DeepEqual(agent2 RestBallotAgent) bool {
-	return agent.Equal(agent2) && concurrent.Equal(agent.Voters, agent2.Voters)
+	return &RestBallotAgent{id, voteType, deadlineTime, theVoters, make(map[string][]int), nbAlts, ctx, comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(tieBreaks))}, nil
 }
 
 func (agent *RestBallotAgent) String() string {
 	return fmt.Sprintf("Bureau %s (%s)", agent.ID, agent.Type)
+}
+
+func (agent *RestBallotAgent) IsClosed() bool {
+	select {
+	case <-agent.Ctx.Done():
+		return true
+	default:
+		return false
+	}
+}
+
+func (agent *RestBallotAgent) Vote(voterId string, prefs []comsoc.Alternative, opts []int) (bool, error) {
+	if agent.IsClosed() {
+		return false, errors.New(fmt.Sprintf("1::%q is closed", agent.String()))
+	}
+
+	if _, exists := agent.Voters[voterId]; !exists {
+		return false, errors.New(fmt.Sprintf("2::Agent %q cannot vote here", voterId))
+	}
+
+	if agent.Voters[voterId] != nil {
+		return false, errors.New(fmt.Sprintf("3::Agent %q already voted", voterId))
+	}
+
+	allAlts := make([]comsoc.Alternative, agent.NbAlts)
+	for idx := range allAlts {
+		allAlts[idx] = comsoc.Alternative(idx + 1)
+	}
+
+	if comsoc.CheckProfile(prefs, allAlts) != nil {
+		return false, errors.New("4::Preferences not correct")
+	}
+
+	agent.Voters[voterId] = prefs
+	if opts != nil {
+		agent.VotersOpts[voterId] = opts
+	}
+
+	return true, nil
 }
 
 func (agent *RestBallotAgent) Start() error {
@@ -95,6 +131,7 @@ func (agent *RestBallotAgent) Start() error {
 
 		<-ctx.Done()
 		log.Println(agent.ID, "Vote closed")
+		log.Println(agent.Voters)
 	}()
 
 	return nil
