@@ -82,7 +82,7 @@ func checkProfile(prefs []Alternative, alts []Alternative) error {
 			}
 		}
 		if nbAlt1 == 0 {
-			err := "erreur : l'alternative " + fmt.Sprint(alt1) + " apparait " + fmt.Sprint(nbAlt1) + " fois dans prefs"
+			err := "erreur : l'alternative " + fmt.Sprint(alt1) + " apparait 0 fois dans prefs"
 			return errors.New(err)
 		}
 	}
