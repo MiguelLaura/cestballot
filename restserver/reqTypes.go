@@ -29,11 +29,13 @@ type VoteRequest struct {
 	Options []int                `json:"options,omitempty"`
 }
 
+const TOO_EARLY = 425
+
 type ResultRequest struct {
 	Ballot string `json:"ballot-id"`
 }
 
 type ResultResponse struct {
 	Winner  comsoc.Alternative   `json:"winner"`
-	Ranking []comsoc.Alternative `json:"ranking"`
+	Ranking []comsoc.Alternative `json:"ranking,omitempty"`
 }

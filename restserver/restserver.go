@@ -173,6 +173,59 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Vote accepted !")
 }
 
+func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
+	if !rst.checkMethod("POST", w, r) {
+		log.Println("doVote : request is not of type POST")
+		return
+	}
+
+	var req ResultRequest
+
+	err := decodeRequest(r, &req)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(BAD_REQUEST)
+		fmt.Fprint(w, "JSON request string incorrect format")
+		return
+	}
+
+	rst.Lock()
+	defer rst.Unlock()
+
+	ballotAgent, exists := rst.ballots[req.Ballot]
+
+	if !exists {
+		log.Println("Error, ballot " + req.Ballot + " does not exist")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "JSON ballot %q does not exist", req.Ballot)
+		return
+	}
+
+	res, err := ballotAgent.GetVoteResult()
+	if err != nil {
+		log.Println("Result : " + err.Error())
+		switch strings.Split(err.Error(), "::")[0] {
+		case "1":
+			w.WriteHeader(TOO_EARLY)
+			fmt.Fprint(w, "It's too early for the result, wait a bit")
+		}
+		return
+	}
+
+	if res == 0 {
+		log.Println("Result not found...")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "Result not found")
+	}
+
+	var resp ResultResponse
+	resp.Winner = res
+
+	w.WriteHeader(http.StatusOK)
+	serial, _ := json.Marshal(resp)
+	w.Write(serial)
+}
+
 /*
 ----------------------------------------
 
@@ -185,6 +238,7 @@ func (rst *RestServerAgent) Start() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/new-ballot", rst.doNewBallot)
 	mux.HandleFunc("/vote", rst.doVote)
+	mux.HandleFunc("/result", rst.doResult)
 
 	// création du serveur http
 	s := &http.Server{

@@ -92,6 +92,9 @@ func (agent *RestBallotAgent) String() string {
 func (agent *RestBallotAgent) IsClosed() bool {
 	select {
 	case <-agent.Ctx.Done():
+		if agent.res == 0 {
+			return false
+		}
 		return true
 	default:
 		return false
@@ -126,6 +129,14 @@ func (agent *RestBallotAgent) Vote(voterId string, prefs []comsoc.Alternative, o
 	}
 
 	return true, nil
+}
+
+func (agent *RestBallotAgent) GetVoteResult() (comsoc.Alternative, error) {
+	if !agent.IsClosed() {
+		return 0, errors.New(fmt.Sprintf("1::%q is not closed", agent.String()))
+	}
+
+	return agent.res, nil
 }
 
 func (agent *RestBallotAgent) Start() error {
