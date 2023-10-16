@@ -19,6 +19,7 @@ type RestBallotAgent struct {
 	NbAlts     int
 	Ctx        context.Context
 	scf        func(comsoc.Profile) (comsoc.Alternative, error)
+	res        comsoc.Alternative
 }
 
 func NewRestBallotAgent(id string,
@@ -71,7 +72,17 @@ func NewRestBallotAgent(id string,
 
 	ctx := context.Background()
 
-	return &RestBallotAgent{id, voteType, deadlineTime, theVoters, make(map[string][]int), nbAlts, ctx, comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(tieBreaks))}, nil
+	return &RestBallotAgent{
+		id,
+		voteType,
+		deadlineTime,
+		theVoters,
+		make(map[string][]int),
+		nbAlts,
+		ctx,
+		comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(tieBreaks)),
+		0,
+	}, nil
 }
 
 func (agent *RestBallotAgent) String() string {
@@ -131,7 +142,21 @@ func (agent *RestBallotAgent) Start() error {
 
 		<-ctx.Done()
 		log.Println(agent.ID, "Vote closed")
-		log.Println(agent.Voters)
+
+		// Proceed to vote...
+		voteProfile := make(comsoc.Profile, len(agent.Voters))
+		idx := 0
+		for _, prefs := range agent.Voters {
+			voteProfile[idx] = prefs
+			idx++
+		}
+
+		resVote, err := agent.scf(voteProfile)
+		if err != nil {
+			log.Printf("Error while voting...")
+			return
+		}
+		agent.res = resVote
 	}()
 
 	return nil
