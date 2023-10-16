@@ -9,40 +9,47 @@ import (
 	"ia04/comsoc"
 	"log"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 )
 
 // [A FAIRE]
 
-// 403 vote déjà effectué
-// 501 Not Implemented
 // 503 la deadline est dépassée
-
 // 425 Too early
 // 404 Not Found
 
-type RestBallotAgent struct {
-	sync.Mutex
-	ballotId  string
-	addr      string
-	rule      string
-	deadline  string
-	voterIds  []string
-	alts      int
-	tieBreak  []comsoc.Alternative
-	methodSWF func(comsoc.Profile) (comsoc.Count, error)
-	methodSCF func(comsoc.Profile) (comsoc.Alternative, error)
-	profile   comsoc.Profile
+type BallotAgent struct {
+	ballotId    string
+	rule        string
+	deadline    string
+	voterIds    []string
+	alts        int
+	tieBreak    []comsoc.Alternative
+	methodSWF   func(comsoc.Profile) (comsoc.Count, error)
+	methodSCF   func(comsoc.Profile) (comsoc.Alternative, error)
+	profile     comsoc.Profile
+	voterIdDone []string
 }
 
-// [A FAIRE] numéro de scrutin auto
-func NewRestBallotAgent(ballotId string, addr string) *RestBallotAgent {
-	return &RestBallotAgent{ballotId: ballotId, addr: addr}
+type RestServerAgent struct {
+	sync.Mutex
+	addr    string
+	ballots map[string]*BallotAgent
+}
+
+func NewRestServerAgent(addr string) *RestServerAgent {
+	return &RestServerAgent{addr: addr, ballots: make(map[string]*BallotAgent)}
+}
+
+func NewBallotAgent(rsa *RestServerAgent) *BallotAgent {
+	ballotId := fmt.Sprintf("scrutin%02d", len(rsa.ballots))
+	return &BallotAgent{ballotId: ballotId}
 }
 
 // Test de la méthode
-func (rba *RestBallotAgent) checkMethod(method string, w http.ResponseWriter, r *http.Request) bool {
+func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != method {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(w, "method %q not allowed", r.Method)
@@ -51,38 +58,38 @@ func (rba *RestBallotAgent) checkMethod(method string, w http.ResponseWriter, r 
 	return true
 }
 
-func (*RestBallotAgent) decodeRequestBallot(r *http.Request) (req agt.RequestBallot, err error) {
+func (*RestServerAgent) decodeRequestBallot(r *http.Request) (req agt.RequestBallot, err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
 	return
 }
 
-func (*RestBallotAgent) decodeRequestVoter(r *http.Request) (req agt.RequestVoter, err error) {
+func (*RestServerAgent) decodeRequestVoter(r *http.Request) (req agt.RequestVoter, err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
 	return
 }
 
-func (*RestBallotAgent) decodeRequestResult(r *http.Request) (req agt.RequestResult, err error) {
+func (*RestServerAgent) decodeRequestResult(r *http.Request) (req agt.RequestResult, err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
 	return
 }
 
-func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) {
-	rba.Lock()
-	defer rba.Unlock()
+func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) {
+	rsa.Lock()
+	defer rsa.Unlock()
 
 	// vérification de la méthode de la requête
-	if !rba.checkMethod("POST", w, r) {
+	if !rsa.checkMethod("POST", w, r) {
 		return
 	}
 
 	// décodage de la requête
-	req, err := rba.decodeRequestBallot(r)
+	req, err := rsa.decodeRequestBallot(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
@@ -97,11 +104,9 @@ func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	tieBreak := comsoc.TieBreakFactory(req.TieBreak)
 	switch req.Rule {
 	case "majority":
-		rba.rule = req.Rule
 		voteMethSWF = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)
 		voteMethSCF = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)
 	case "borda":
-		rba.rule = req.Rule
 		voteMethSWF = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)
 		voteMethSCF = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)
 	// [A FAIRE]
@@ -110,11 +115,9 @@ func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	// case "condorcet":
 	// 	voteMeth = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)
 	case "copeland":
-		rba.rule = req.Rule
 		voteMethSWF = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)
 		voteMethSCF = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)
 	case "STV":
-		rba.rule = req.Rule
 		voteMethSWF = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)
 		voteMethSCF = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)
 	default:
@@ -123,9 +126,6 @@ func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		w.Write([]byte(msg))
 		return
 	}
-	rba.rule = req.Rule
-	rba.methodSWF = voteMethSWF
-	rba.methodSCF = voteMethSCF
 
 	// Deadline
 	_, err = time.Parse(time.RFC3339, req.Deadline)
@@ -135,7 +135,6 @@ func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	rba.deadline = req.Deadline
 
 	// VoterIds
 	if len(req.VoterIds) == 0 {
@@ -144,7 +143,6 @@ func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	rba.voterIds = req.VoterIds
 
 	// Alts
 	if req.Alts <= 1 {
@@ -153,38 +151,62 @@ func (rba *RestBallotAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	rba.alts = req.Alts
 
 	// TieBreak
-	err = checkTieBreak(rba.alts, req.TieBreak)
+	err = checkTieBreak(req.Alts, req.TieBreak)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	rba.tieBreak = req.TieBreak
+
+	// Créer ballot
+	ballot := NewBallotAgent(rsa)
+	rsa.ballots[ballot.ballotId] = ballot
+	ballot.rule = req.Rule
+	ballot.methodSWF = voteMethSWF
+	ballot.methodSCF = voteMethSCF
+	ballot.deadline = req.Deadline
+	ballot.voterIds = req.VoterIds
+	ballot.alts = req.Alts
+	ballot.tieBreak = req.TieBreak
 
 	// Gérer la réponse sans erreur
 	var resp agt.ResponseBallot
-	resp.BallotId = rba.ballotId
+	resp.BallotId = ballot.ballotId
 	w.WriteHeader(http.StatusCreated)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
 }
 
-func (rba *RestBallotAgent) doVote(w http.ResponseWriter, r *http.Request) {
+func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	// mise à jour du nombre de requêtes
-	rba.Lock()
-	defer rba.Unlock()
+	rsa.Lock()
+	defer rsa.Unlock()
 
 	// vérification de la méthode de la requête
-	if !rba.checkMethod("POST", w, r) {
+	if !rsa.checkMethod("POST", w, r) {
 		return
 	}
 
 	// décodage de la requête
-	req, err := rba.decodeRequestVoter(r)
+	req, err := rsa.decodeRequestVoter(r)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+
+	// BallotId
+	if req.BallotId == "" {
+		err = errors.New("erreur : il manque l'id du ballot")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+	ballot := rsa.ballots[req.BallotId]
+	if ballot == nil {
+		err = errors.New("erreur : le ballot n'existe pas encore")
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
@@ -197,39 +219,38 @@ func (rba *RestBallotAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
-
-	// BallotId
-	if req.BallotId == "" {
-		err = errors.New("erreur : il manque l'id du ballot")
-		w.WriteHeader(http.StatusBadRequest)
+	if slices.Contains(ballot.voterIdDone, req.AgentId) {
+		err = errors.New("erreur : l'agent " + fmt.Sprint(req.AgentId) + " a déjà voté.")
+		w.WriteHeader(http.StatusForbidden)
 		fmt.Fprint(w, err.Error())
 		return
 	}
 
 	// Prefs
-	err = checkPrefs(rba.alts, req.Prefs)
+	err = checkPrefs(ballot.alts, req.Prefs)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	rba.profile = append(rba.profile, req.Prefs)
+	ballot.profile = append(ballot.profile, req.Prefs)
+	ballot.voterIdDone = append(ballot.voterIdDone, req.AgentId)
 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (rba *RestBallotAgent) doResult(w http.ResponseWriter, r *http.Request) {
+func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	// mise à jour du nombre de requêtes
-	rba.Lock()
-	defer rba.Unlock()
+	rsa.Lock()
+	defer rsa.Unlock()
 
 	// vérification de la méthode de la requête
-	if !rba.checkMethod("POST", w, r) {
+	if !rsa.checkMethod("POST", w, r) {
 		return
 	}
 
 	// décodage de la requête
-	req, err := rba.decodeRequestResult(r)
+	req, err := rsa.decodeRequestResult(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
@@ -243,31 +264,39 @@ func (rba *RestBallotAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
+	ballot := rsa.ballots[req.BallotId]
+	if ballot == nil {
+		err = errors.New("erreur : le ballot n'existe pas encore")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+
 	var resp agt.ResponseResult
-	resp.Ranking, _ = rba.methodSWF(rba.profile)
-	resp.Winner, _ = rba.methodSCF(rba.profile)
+	resp.Ranking, _ = ballot.methodSWF(ballot.profile)
+	resp.Winner, _ = ballot.methodSCF(ballot.profile)
 
 	w.WriteHeader(http.StatusOK)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
 }
 
-func (rba *RestBallotAgent) Start() {
+func (rsa *RestServerAgent) Start() {
 	// création du multiplexer
 	mux := http.NewServeMux()
-	mux.HandleFunc("/new_ballot", rba.doNewBallot)
-	mux.HandleFunc("/vote", rba.doVote)
-	mux.HandleFunc("/result", rba.doResult)
+	mux.HandleFunc("/new_ballot", rsa.doNewBallot)
+	mux.HandleFunc("/vote", rsa.doVote)
+	mux.HandleFunc("/result", rsa.doResult)
 
 	// création du serveur http
 	s := &http.Server{
-		Addr:           rba.addr,
+		Addr:           rsa.addr,
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20}
 
 	// lancement du serveur
-	log.Println("Listening on", rba.addr)
+	log.Println("Listening on", rsa.addr)
 	go log.Fatal(s.ListenAndServe())
 }

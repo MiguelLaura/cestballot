@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	server := ballotagent.NewRestBallotAgent("scrutin12", ":8080")
+	server := ballotagent.NewRestServerAgent(":8080")
 	server.Start()
 	fmt.Scanln()
 }

@@ -14,7 +14,7 @@ func main() {
 	const url2 = "http://localhost:8080"
 
 	clAgts := make([]voteragent.RestVoterAgent, 0, n)
-	servAgt := ballotagent.NewRestBallotAgent("scrutin12", url1)
+	servAgt := ballotagent.NewRestServerAgent(url1)
 
 	log.Println("démarrage du serveur...")
 	go servAgt.Start()
