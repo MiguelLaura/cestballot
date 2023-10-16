@@ -36,9 +36,9 @@ type RestBallotAgent struct {
 	profile   comsoc.Profile
 }
 
-// [A FAIRE] numéro de scrutin
-func NewRestBallotAgent(addr string) *RestBallotAgent {
-	return &RestBallotAgent{ballotId: "scrutin", addr: addr}
+// [A FAIRE] numéro de scrutin auto
+func NewRestBallotAgent(ballotId string, addr string) *RestBallotAgent {
+	return &RestBallotAgent{ballotId: ballotId, addr: addr}
 }
 
 // Test de la méthode
@@ -207,15 +207,12 @@ func (rba *RestBallotAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Prefs
-	if len(req.Prefs) != rba.alts {
-		err = errors.New("erreur : il manque une(des) alternative(s) dans prefs")
+	err = checkPrefs(rba.alts, req.Prefs)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
 	}
-
-	// [A FAIRE]
-	// check prefs ?
 	rba.profile = append(rba.profile, req.Prefs)
 
 	w.WriteHeader(http.StatusOK)

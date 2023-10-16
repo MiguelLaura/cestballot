@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-type RestClientAgent struct {
+type RestVoterAgent struct {
 	agentId  string
 	url      string
 	ballotId string
@@ -18,20 +18,20 @@ type RestClientAgent struct {
 	options  []int
 }
 
-func NewRestClientAgent(agentId string, url string, ballotId string, prefs []comsoc.Alternative, options []int) *RestClientAgent {
-	return &RestClientAgent{agentId, url, ballotId, prefs, options}
+func NewRestVoterAgent(agentId string, url string, ballotId string, prefs []comsoc.Alternative, options []int) *RestVoterAgent {
+	return &RestVoterAgent{agentId, url, ballotId, prefs, options}
 }
 
-func (rca *RestClientAgent) doVote() (err error) {
+func (rva *RestVoterAgent) doVote() (err error) {
 	req := agt.RequestVoter{
-		AgentId:  rca.agentId,
-		BallotId: rca.ballotId,
-		Prefs:    rca.prefs,
-		Options:  rca.options,
+		AgentId:  rva.agentId,
+		BallotId: rva.ballotId,
+		Prefs:    rva.prefs,
+		Options:  rva.options,
 	}
 
 	// sérialisation de la requête
-	url := rca.url + "/vote"
+	url := rva.url + "/vote"
 	data, _ := json.Marshal(req)
 
 	// envoi de la requête
@@ -49,13 +49,13 @@ func (rca *RestClientAgent) doVote() (err error) {
 	return
 }
 
-func (rca *RestClientAgent) Start() {
-	log.Printf("démarrage de %s", rca.agentId)
-	err := rca.doVote()
+func (rva *RestVoterAgent) Start() {
+	log.Printf("démarrage de %s", rva.agentId)
+	err := rva.doVote()
 
 	if err != nil {
-		log.Fatal(rca.agentId, "error:", err.Error())
+		log.Fatal(rva.agentId, "error:", err.Error())
 	} else {
-		log.Printf("[%s] %s %d %d\n", rca.agentId, rca.ballotId, rca.prefs, rca.options)
+		log.Printf("[%s] %s %d %d\n", rva.agentId, rva.ballotId, rva.prefs, rva.options)
 	}
 }

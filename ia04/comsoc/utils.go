@@ -64,7 +64,8 @@ func minCount(count Count) (worstAlts []Alternative) {
 // vérifie les préférences d'un agent,
 // par ex. qu'ils sont tous complets et
 // que chaque alternative n'apparaît qu'une seule fois
-func checkProfile(prefs []Alternative, alts []Alternative) error {
+// Changement -> maj alors que y en avait pas
+func CheckProfile(prefs []Alternative, alts []Alternative) error {
 	nbAlts := len(alts)
 	if len(prefs) != nbAlts {
 		err := "erreur : prefs de taille différente de alts (len(prefs)==" + fmt.Sprint(len(prefs)) + " et len(alts)==" + fmt.Sprint(nbAlts) + ")"
@@ -93,7 +94,7 @@ func checkProfile(prefs []Alternative, alts []Alternative) error {
 // de alts apparaît exactement une fois par préférences
 func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 	for idx, profile := range prefs {
-		err := checkProfile(profile, alts)
+		err := CheckProfile(profile, alts)
 		if err != nil {
 			return fmt.Errorf("%w; pour prefs de profile["+fmt.Sprint(idx)+"]", err)
 		}
