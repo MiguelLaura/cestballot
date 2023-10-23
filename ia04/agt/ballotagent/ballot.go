@@ -108,7 +108,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	if time.Now().After(timeParsed) {
-		err = errors.New("erreur : la deadline est déjà passée")
+		err = errors.New("erreur : la deadline est déjà passée : " + fmt.Sprint(timeParsed))
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
@@ -204,7 +204,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 
 	// Deadline
 	if time.Now().After(ballot.deadline) {
-		err = errors.New("erreur : la deadline est déjà passée")
+		err = errors.New("erreur : la deadline est déjà passée : " + fmt.Sprint(ballot.deadline))
 		w.WriteHeader(http.StatusServiceUnavailable)
 		fmt.Fprint(w, err.Error())
 		return
@@ -267,7 +267,7 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	// Deadline
 	if time.Now().Before(ballot.deadline) {
-		err = errors.New("erreur : la deadline n'est pas encore passée")
+		err = errors.New("erreur : la deadline n'est pas encore passée : " + fmt.Sprint(ballot.deadline))
 		w.WriteHeader(http.StatusTooEarly)
 		fmt.Fprint(w, err.Error())
 		return
@@ -275,30 +275,34 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	// Methode de vote
 	var resp agt.ResponseResult
-	tieBreak := comsoc.TieBreakFactory(ballot.tieBreak)
-	switch ballot.rule {
-	case "majority":
-		resp.Ranking, _ = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)(ballot.profile)
-		resp.Winner, _ = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)(ballot.profile)
-	case "borda":
-		resp.Ranking, _ = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)(ballot.profile)
-		resp.Winner, _ = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)(ballot.profile)
-	// [A VERIFIER]
-	case "approval":
-		resp.Ranking, _ = comsoc.SWFFactoryApproval(comsoc.ApprovalSWF, tieBreak)(ballot.profile, ballot.options)
-		resp.Winner, _ = comsoc.SCFFactoryApproval(comsoc.ApprovalSCF, tieBreak)(ballot.profile, ballot.options)
-	case "condorcet":
+	if ballot.profile == nil {
+		resp.Ranking = ballot.tieBreak
+		resp.Winner = ballot.tieBreak[0]
+	} else {
+		tieBreak := comsoc.TieBreakFactory(ballot.tieBreak)
+		switch ballot.rule {
+		case "majority":
+			resp.Ranking, _ = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)(ballot.profile)
+			resp.Winner, _ = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)(ballot.profile)
+		case "borda":
+			resp.Ranking, _ = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)(ballot.profile)
+			resp.Winner, _ = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)(ballot.profile)
 		// [A VERIFIER]
-		resp.Ranking = nil
-		resp.Winner, _ = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)(ballot.profile)
-	case "copeland":
-		resp.Ranking, _ = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)(ballot.profile)
-		resp.Winner, _ = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)(ballot.profile)
-	case "STV":
-		resp.Ranking, _ = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)(ballot.profile)
-		resp.Winner, _ = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)(ballot.profile)
+		case "approval":
+			resp.Ranking, _ = comsoc.SWFFactoryApproval(comsoc.ApprovalSWF, tieBreak)(ballot.profile, ballot.options)
+			resp.Winner, _ = comsoc.SCFFactoryApproval(comsoc.ApprovalSCF, tieBreak)(ballot.profile, ballot.options)
+		case "condorcet":
+			// [A VERIFIER]
+			resp.Ranking = nil
+			resp.Winner, _ = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)(ballot.profile)
+		case "copeland":
+			resp.Ranking, _ = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)(ballot.profile)
+			resp.Winner, _ = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)(ballot.profile)
+		case "STV":
+			resp.Ranking, _ = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)(ballot.profile)
+			resp.Winner, _ = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)(ballot.profile)
+		}
 	}
-
 	w.WriteHeader(http.StatusOK)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)

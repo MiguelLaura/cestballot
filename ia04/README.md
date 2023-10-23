@@ -1,7 +1,7 @@
 # A corriger
 * changer les parcours de listes pour vérifier la présence d'un élément avec slices.Contains
-* vérifier condorcet et threshold
 * revoir les launch
+* implémenter des tests sur le serveur
 
 # Hypothèses
 * On a au moins 1 voter
@@ -9,3 +9,5 @@
 * Quand il n'y a pas de SWF (Condorcet), on renvoie nil/null
 * Pas d'erreur quand on donne des options alors que la règle n'est pas approval
 * Erreur quand on donne en option autre chose qu'un seul nombre dans une slice et qu'on va utiliser l'option
+* Les agtid peuvent s'abstenir
+* Quand tous les agt s'abstiennent, on renvoie le résultat à partir de tiebreak
