@@ -14,20 +14,14 @@ import (
 	"time"
 )
 
-// [A FAIRE]
-
-// 503 la deadline est dépassée
-// 425 Too early
-// 404 Not Found
-
 type BallotAgent struct {
 	ballotId    string
 	rule        string
-	deadline    string
+	deadline    time.Time
 	voterIds    []string
 	alts        int
 	tieBreak    []comsoc.Alternative
-	methodSWF   func(comsoc.Profile) (comsoc.Count, error)
+	methodSWF   func(comsoc.Profile) ([]comsoc.Alternative, error)
 	methodSCF   func(comsoc.Profile) (comsoc.Alternative, error)
 	profile     comsoc.Profile
 	voterIdDone []string
@@ -99,7 +93,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	// traitement de la requête
 
 	// Méthode de vite
-	var voteMethSWF func(comsoc.Profile) (comsoc.Count, error)
+	var voteMethSWF func(comsoc.Profile) ([]comsoc.Alternative, error)
 	var voteMethSCF func(comsoc.Profile) (comsoc.Alternative, error)
 	tieBreak := comsoc.TieBreakFactory(req.TieBreak)
 	switch req.Rule {
@@ -128,9 +122,15 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Deadline
-	_, err = time.Parse(time.RFC3339, req.Deadline)
+	timeParsed, err := time.Parse(time.RFC3339, req.Deadline)
 	if err != nil {
 		err = errors.New("erreur : mauvais format de deadline")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+	if time.Now().After(timeParsed) {
+		err = errors.New("erreur : la deadline est déjà passée")
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
@@ -166,7 +166,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	ballot.rule = req.Rule
 	ballot.methodSWF = voteMethSWF
 	ballot.methodSCF = voteMethSCF
-	ballot.deadline = req.Deadline
+	ballot.deadline = timeParsed
 	ballot.voterIds = req.VoterIds
 	ballot.alts = req.Alts
 	ballot.tieBreak = req.TieBreak
@@ -226,6 +226,14 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Deadline
+	if time.Now().After(ballot.deadline) {
+		err = errors.New("erreur : la deadline est déjà passée")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+
 	// Prefs
 	err = checkPrefs(ballot.alts, req.Prefs)
 	if err != nil {
@@ -266,8 +274,16 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	}
 	ballot := rsa.ballots[req.BallotId]
 	if ballot == nil {
-		err = errors.New("erreur : le ballot n'existe pas encore")
+		err = errors.New("erreur : le ballot n'existe pas")
 		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+
+	// Deadline
+	if time.Now().Before(ballot.deadline) {
+		err = errors.New("erreur : la deadline n'est pas encore passée")
+		w.WriteHeader(http.StatusTooEarly)
 		fmt.Fprint(w, err.Error())
 		return
 	}

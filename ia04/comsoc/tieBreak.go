@@ -27,16 +27,17 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 	}
 }
 
-// Changement dans signature A CORRIGER
-func SWFFactory(swf func(p Profile) (Count, error), tieBreaker func([]Alternative) (Alternative, error)) func(Profile) (Count, error) {
-	return func(p Profile) (Count, error) {
+// [A FAIRE]
+// Changement dans signature
+func SWFFactory(swf func(p Profile) (Count, error), tieBreaker func([]Alternative) (Alternative, error)) func(Profile) ([]Alternative, error) {
+	return func(p Profile) ([]Alternative, error) {
 		count, err := swf(p)
 		if err != nil {
 			return nil, err
 		}
 
 		exAequo := make(map[int][]Alternative)
-		res := make(Count)
+		res := make([]Alternative, len(count))
 
 		for alt, votes := range count {
 			if _, err := exAequo[votes]; !err {
@@ -48,22 +49,21 @@ func SWFFactory(swf func(p Profile) (Count, error), tieBreaker func([]Alternativ
 		}
 
 		keys := make([]int, 0, len(exAequo))
-
 		for k := range exAequo {
 			keys = append(keys, k)
 		}
 		sort.Ints(keys)
+		idxRes := len(count) - 1
 
-		add := 0
-		for _, k := range keys {
-			alts := exAequo[k]
-			newAdd := len(alts) - 1
-			for i := newAdd; i > -1; i-- {
+		for i := 0; i < len(keys); i++ {
+			alts := exAequo[keys[i]]
+			nbAlts := len(alts)
+			for j := 0; j < nbAlts; j++ {
 				bestAlt, err := tieBreaker(alts)
 				if err != nil {
 					return nil, err
 				}
-				res[bestAlt] = count[bestAlt] + add + i
+				res[idxRes-(nbAlts-1-j)] = bestAlt
 				for idx, alt := range alts {
 					if alt == bestAlt {
 						alts = append(alts[:idx], alts[idx+1:]...)
@@ -71,7 +71,7 @@ func SWFFactory(swf func(p Profile) (Count, error), tieBreaker func([]Alternativ
 					}
 				}
 			}
-			add += newAdd
+			idxRes -= nbAlts
 		}
 		return res, nil
 	}
@@ -83,7 +83,6 @@ func SCFFactory(scf func(p Profile) ([]Alternative, error), tieBreaker func([]Al
 		if err != nil {
 			return 0, err
 		}
-
 		return tieBreaker(bestAlts)
 	}
 

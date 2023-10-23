@@ -47,6 +47,7 @@ func maxCount(count Count) (bestAlts []Alternative) {
 	return bestAlts
 }
 
+// [RAJOUT]
 // renvoie les meilleures alternatives pour un décompte donné
 func minCount(count Count) (worstAlts []Alternative) {
 	for key, val := range count {

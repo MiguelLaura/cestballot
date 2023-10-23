@@ -1,20 +1,18 @@
 package comsoc
 
-// changement dans signature
-
 // Le meilleur candidat est celui qui bat le plus d’autres candidats
 // On associe à chaque candidat a le score suivant :
 // pour chaque autre candidat b≠a +1 si une majorité préfère a à b,
 // -1 si une majorité préfère b à a et 0 sinon
 // Le candidat élu est celui qui a le plus haut score de Copeland
-func CopelandSWF(p Profile) (count Count, err error) {
+func CopelandSWF(p Profile) (Count, error) {
 	alts := p[0]
-	err = checkProfileAlternative(p, alts)
+	err := checkProfileAlternative(p, alts)
 	if err != nil {
-		return count, err
+		return make(Count), err
 	}
 
-	count = make(Count)
+	count := make(Count)
 	for _, alt := range alts {
 		count[alt] = 0
 	}

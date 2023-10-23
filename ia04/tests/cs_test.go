@@ -332,29 +332,55 @@ func TestTieBreakFactory(t *testing.T) {
 }
 
 func TestSWFFactory(t *testing.T) {
-	orderedAlts := []comsoc.Alternative{1, 2, 3}
-	prefs := [][]comsoc.Alternative{
-		{1, 3, 2},
-		{1, 2, 3},
-		{2, 1, 3},
-		{2, 1, 3},
+	orderedAlts := []comsoc.Alternative{1, 2, 3, 4}
+	prefs1 := [][]comsoc.Alternative{
+		{1, 3, 2, 4},
+		{1, 2, 3, 4},
+		{2, 1, 3, 4},
+		{2, 1, 3, 4},
+	}
+	prefs2 := [][]comsoc.Alternative{
+		{3, 2, 1, 4},
+		{3, 2, 1, 4},
+		{3, 1, 2, 4},
+		{3, 1, 2, 4},
 	}
 
 	tieBreak := comsoc.TieBreakFactory(orderedAlts)
 	f := comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)
-	res, err := f(prefs)
+	res1, err1 := f(prefs1)
+	res2, err2 := f(prefs2)
 
-	if err != nil {
-		t.Error(err)
+	if err1 != nil {
+		t.Error(err1)
 	}
-	if res[1] != 3 {
-		t.Errorf("erreur, resultat pour 1 devrait être 3, %d calculé", res[1])
+	if res1[0] != 1 {
+		t.Errorf("erreur, le premier resultat devrait être 1, %d calculé", res1[0])
 	}
-	if res[2] != 2 {
-		t.Errorf("erreur, résultat pour 2 devrait être 0, %d calculé", res[2])
+	if res1[1] != 2 {
+		t.Errorf("erreur, le deuxième résultat devrait être 2, %d calculé", res1[1])
 	}
-	if res[3] != 0 {
-		t.Errorf("erreur, résultat pour 3 devrait être 1, %d calculé", res[3])
+	if res1[2] != 3 {
+		t.Errorf("erreur, le troisième résultat devrait être 3, %d calculé", res1[2])
+	}
+	if res1[3] != 4 {
+		t.Errorf("erreur, le troisième résultat devrait être 4, %d calculé", res1[3])
+	}
+
+	if err2 != nil {
+		t.Error(err2)
+	}
+	if res2[0] != 3 {
+		t.Errorf("erreur, le premier resultat devrait être 3, %d calculé", res2[0])
+	}
+	if res2[1] != 1 {
+		t.Errorf("erreur, le deuxième résultat devrait être 1, %d calculé", res2[1])
+	}
+	if res2[2] != 2 {
+		t.Errorf("erreur, le troisième résultat devrait être 2, %d calculé", res2[2])
+	}
+	if res2[3] != 4 {
+		t.Errorf("erreur, le troisième résultat devrait être 4, %d calculé", res2[3])
 	}
 }
 

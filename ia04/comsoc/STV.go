@@ -1,7 +1,5 @@
 package comsoc
 
-// Changement signature
-
 // Chaque individu indique donne son ordre de préférence $>_i$
 // Pour n candidats, on fait n-1 tours
 // (à moins d’avoir avant une majorité stricte pour un candidat)
@@ -9,15 +7,15 @@ package comsoc
 // (parmi ceux encore en course)
 // À chaque tour on élimine le plus mauvais candidat
 // (celui qui a le moins de voix)
-func STV_SWF(p Profile) (count Count, err error) {
+func STV_SWF(p Profile) (Count, error) {
 
 	alts := p[0]
-	err = checkProfileAlternative(p, alts)
+	err := checkProfileAlternative(p, alts)
 	if err != nil {
-		return count, err
+		return make(Count), err
 	}
 
-	count = make(Count)
+	count := make(Count)
 	for _, alt := range alts {
 		count[alt] = 0
 	}

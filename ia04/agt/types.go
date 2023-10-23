@@ -29,6 +29,6 @@ type RequestResult struct {
 
 // [A FAIRE] changer type ranking
 type ResponseResult struct {
-	Winner  comsoc.Alternative `json:"winner"`
-	Ranking comsoc.Count       `json:"ranking"`
+	Winner  comsoc.Alternative   `json:"winner"`
+	Ranking []comsoc.Alternative `json:"ranking"`
 }
