@@ -21,8 +21,7 @@ type BallotAgent struct {
 	voterIds    []string
 	alts        int
 	tieBreak    []comsoc.Alternative
-	methodSWF   func(comsoc.Profile) ([]comsoc.Alternative, error)
-	methodSCF   func(comsoc.Profile) (comsoc.Alternative, error)
+	options     []int
 	profile     comsoc.Profile
 	voterIdDone []string
 }
@@ -38,7 +37,7 @@ func NewRestServerAgent(addr string) *RestServerAgent {
 }
 
 func NewBallotAgent(rsa *RestServerAgent) *BallotAgent {
-	ballotId := fmt.Sprintf("scrutin%02d", len(rsa.ballots))
+	ballotId := fmt.Sprintf("scrutin%02d", len(rsa.ballots)+1)
 	return &BallotAgent{ballotId: ballotId}
 }
 
@@ -92,31 +91,10 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 
 	// traitement de la requête
 
-	// Méthode de vite
-	var voteMethSWF func(comsoc.Profile) ([]comsoc.Alternative, error)
-	var voteMethSCF func(comsoc.Profile) (comsoc.Alternative, error)
-	tieBreak := comsoc.TieBreakFactory(req.TieBreak)
-	switch req.Rule {
-	case "majority":
-		voteMethSWF = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)
-		voteMethSCF = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)
-	case "borda":
-		voteMethSWF = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)
-		voteMethSCF = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)
-	// [A FAIRE]
-	// case "approval":
-	// 	vote = comsoc.SCFFactory(comsoc.ApprovalSCF, tieBreak)
-	// case "condorcet":
-	// 	voteMeth = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)
-	case "copeland":
-		voteMethSWF = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)
-		voteMethSCF = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)
-	case "STV":
-		voteMethSWF = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)
-		voteMethSCF = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)
-	default:
+	// Méthode de vote
+	if !slices.Contains([]string{"majority", "borda", "approval", "condorcet", "copeland", "STV"}, req.Rule) {
 		w.WriteHeader(http.StatusNotImplemented)
-		msg := fmt.Sprintf("Règle de vote inconnue '%s'", req.Rule)
+		msg := fmt.Sprintf("erreur : règle de vote inconnue '%s'", req.Rule)
 		w.Write([]byte(msg))
 		return
 	}
@@ -164,8 +142,6 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	ballot := NewBallotAgent(rsa)
 	rsa.ballots[ballot.ballotId] = ballot
 	ballot.rule = req.Rule
-	ballot.methodSWF = voteMethSWF
-	ballot.methodSCF = voteMethSCF
 	ballot.deadline = timeParsed
 	ballot.voterIds = req.VoterIds
 	ballot.alts = req.Alts
@@ -241,7 +217,16 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
+
+	// Options
+	if ballot.rule == "approval" && len(req.Options) != 1 {
+		err = errors.New("erreur : Options est forcément de la forme [1]int")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
 	ballot.profile = append(ballot.profile, req.Prefs)
+	ballot.options = append(ballot.options, req.Options...)
 	ballot.voterIdDone = append(ballot.voterIdDone, req.AgentId)
 
 	w.WriteHeader(http.StatusOK)
@@ -288,9 +273,31 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Methode de vote
 	var resp agt.ResponseResult
-	resp.Ranking, _ = ballot.methodSWF(ballot.profile)
-	resp.Winner, _ = ballot.methodSCF(ballot.profile)
+	tieBreak := comsoc.TieBreakFactory(ballot.tieBreak)
+	switch ballot.rule {
+	case "majority":
+		resp.Ranking, _ = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)(ballot.profile)
+		resp.Winner, _ = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)(ballot.profile)
+	case "borda":
+		resp.Ranking, _ = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)(ballot.profile)
+		resp.Winner, _ = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)(ballot.profile)
+	// [A VERIFIER]
+	case "approval":
+		resp.Ranking, _ = comsoc.SWFFactoryApproval(comsoc.ApprovalSWF, tieBreak)(ballot.profile, ballot.options)
+		resp.Winner, _ = comsoc.SCFFactoryApproval(comsoc.ApprovalSCF, tieBreak)(ballot.profile, ballot.options)
+	case "condorcet":
+		// [A VERIFIER]
+		resp.Ranking = nil
+		resp.Winner, _ = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)(ballot.profile)
+	case "copeland":
+		resp.Ranking, _ = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)(ballot.profile)
+		resp.Winner, _ = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)(ballot.profile)
+	case "STV":
+		resp.Ranking, _ = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)(ballot.profile)
+		resp.Winner, _ = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)(ballot.profile)
+	}
 
 	w.WriteHeader(http.StatusOK)
 	serial, _ := json.Marshal(resp)

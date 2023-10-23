@@ -27,7 +27,6 @@ type RequestResult struct {
 	BallotId string `json:"ballot-id"`
 }
 
-// [A FAIRE] changer type ranking
 type ResponseResult struct {
 	Winner  comsoc.Alternative   `json:"winner"`
 	Ranking []comsoc.Alternative `json:"ranking"`
