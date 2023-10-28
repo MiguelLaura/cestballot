@@ -3,7 +3,7 @@ package ballotagent
 import (
 	"errors"
 	"fmt"
-	"ia04/comsoc"
+	"ia04-tp/comsoc"
 )
 
 func checkTieBreak(alts int, tieBreak []comsoc.Alternative) error {

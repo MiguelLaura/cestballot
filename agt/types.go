@@ -1,6 +1,6 @@
 package agt
 
-import "ia04/comsoc"
+import "ia04-tp/comsoc"
 
 type RequestBallot struct {
 	Rule     string               `json:"rule"`

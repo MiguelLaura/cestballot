@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"ia04/agt/voteragent"
-	"ia04/comsoc"
+	"ia04-tp/agt/voteragent"
+	"ia04-tp/comsoc"
 )
 
 func main() {

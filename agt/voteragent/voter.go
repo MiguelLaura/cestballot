@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"ia04/agt"
-	"ia04/comsoc"
+	"ia04-tp/agt"
+	"ia04-tp/comsoc"
 	"log"
 	"net/http"
 )

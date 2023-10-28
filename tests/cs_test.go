@@ -1,11 +1,7 @@
-// version 2.0.0
-
-//  RAJOUT DE COMSOC
-
 package test_comsoc
 
 import (
-	"ia04/comsoc"
+	"ia04-tp/comsoc"
 	"testing"
 )
 
