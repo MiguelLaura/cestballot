@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	ba "ia04/agt/ballotagent"
+	ba "gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
 	"log"
 	"net/http"
 	"strings"

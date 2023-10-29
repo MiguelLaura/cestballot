@@ -3,8 +3,8 @@ package concurrent
 import (
 	"sync"
 
-	"ia04/utils"
-	"ia04/utils/sequential"
+	"gitlab.utc.fr/mennynat/ia04-tp/utils"
+	"gitlab.utc.fr/mennynat/ia04-tp/utils/sequential"
 )
 
 // ---------------------------

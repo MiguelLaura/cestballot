@@ -2,9 +2,9 @@ package ballotagent
 
 import (
 	"fmt"
-	"ia04/agt"
-	"ia04/comsoc"
-	"ia04/utils/concurrent"
+	"gitlab.utc.fr/mennynat/ia04-tp/agt"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"gitlab.utc.fr/mennynat/ia04-tp/utils/concurrent"
 	"log"
 	"time"
 )

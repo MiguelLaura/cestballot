@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"ia04/comsoc"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 	"log"
 	"strings"
 	"time"

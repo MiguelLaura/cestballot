@@ -1,6 +1,6 @@
 package restserver
 
-import "ia04/comsoc"
+import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 
 const BAD_REQUEST = 400
 const NOT_IMPL = 501

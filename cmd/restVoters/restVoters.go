@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	rst "ia04/restserver"
+	rst "gitlab.utc.fr/mennynat/ia04-tp/restserver"
 )
 
 func main() {

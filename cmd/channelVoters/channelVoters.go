@@ -1,10 +1,10 @@
 package main
 
 import (
-	"ia04/agt"
-	"ia04/agt/ballotagent"
-	"ia04/agt/voteragent"
-	"ia04/comsoc"
+	"gitlab.utc.fr/mennynat/ia04-tp/agt"
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 	"time"
 )
 
