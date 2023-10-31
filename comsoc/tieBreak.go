@@ -27,7 +27,7 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 	}
 }
 
-// [A FAIRE]
+// [CHANGEMENT]
 // Changement dans signature
 func SWFFactory(swf func(p Profile) (Count, error), tieBreaker func([]Alternative) (Alternative, error)) func(Profile) ([]Alternative, error) {
 	return func(p Profile) ([]Alternative, error) {

@@ -1,5 +1,7 @@
 package comsoc
 
+import "slices"
+
 // Chaque individu indique donne son ordre de préférence $>_i$
 // Pour n candidats, on fait n-1 tours
 // (à moins d’avoir avant une majorité stricte pour un candidat)
@@ -30,13 +32,7 @@ func STV_SWF(p Profile) (Count, error) {
 
 		countRound := make(Count)
 		for _, alt := range alts {
-			skip := false
-			for _, eli := range eliminated {
-				if alt == eli {
-					skip = true
-					break
-				}
-			}
+			skip := slices.Contains(eliminated, alt)
 			if !skip {
 				countRound[alt] = 0
 			}
@@ -44,13 +40,7 @@ func STV_SWF(p Profile) (Count, error) {
 
 		for _, prefs := range p {
 			for _, alt := range prefs {
-				skip := false
-				for _, eli := range eliminated {
-					if alt == eli {
-						skip = true
-						break
-					}
-				}
+				skip := slices.Contains(eliminated, alt)
 				if !skip {
 					countRound[alt] += 1
 					break

@@ -48,7 +48,7 @@ func maxCount(count Count) (bestAlts []Alternative) {
 }
 
 // [RAJOUT]
-// renvoie les meilleures alternatives pour un décompte donné
+// renvoie les pires alternatives pour un décompte donné
 func minCount(count Count) (worstAlts []Alternative) {
 	for key, val := range count {
 		if worstAlts == nil {
@@ -65,8 +65,7 @@ func minCount(count Count) (worstAlts []Alternative) {
 // vérifie les préférences d'un agent,
 // par ex. qu'ils sont tous complets et
 // que chaque alternative n'apparaît qu'une seule fois
-// Changement -> maj alors que y en avait pas
-func CheckProfile(prefs []Alternative, alts []Alternative) error {
+func checkProfile(prefs []Alternative, alts []Alternative) error {
 	nbAlts := len(alts)
 	if len(prefs) != nbAlts {
 		err := "erreur : prefs de taille différente de alts (len(prefs)==" + fmt.Sprint(len(prefs)) + " et len(alts)==" + fmt.Sprint(nbAlts) + ")"
@@ -95,7 +94,7 @@ func CheckProfile(prefs []Alternative, alts []Alternative) error {
 // de alts apparaît exactement une fois par préférences
 func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 	for idx, profile := range prefs {
-		err := CheckProfile(profile, alts)
+		err := checkProfile(profile, alts)
 		if err != nil {
 			return fmt.Errorf("%w; pour prefs de profile["+fmt.Sprint(idx)+"]", err)
 		}

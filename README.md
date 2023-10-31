@@ -7,8 +7,7 @@
 * launch-rva : lance un voter
 * launch-all-agt : lance le serveur, des ballots et des voters (les ballotes ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voter votent dans un seul ballot décidé aléatoirement)
 
-# A corriger
-* Changer les parcours de listes pour vérifier la présence d'un élément avec slices.Contains
+# A faire
 * Implémenter des tests sur le serveur
 
 # Hypothèses

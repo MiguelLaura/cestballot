@@ -285,12 +285,10 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		case "borda":
 			resp.Ranking, _ = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)(ballot.profile)
 			resp.Winner, _ = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)(ballot.profile)
-		// [A VERIFIER]
 		case "approval":
 			resp.Ranking, _ = comsoc.SWFFactoryApproval(comsoc.ApprovalSWF, tieBreak)(ballot.profile, ballot.options)
 			resp.Winner, _ = comsoc.SCFFactoryApproval(comsoc.ApprovalSCF, tieBreak)(ballot.profile, ballot.options)
 		case "condorcet":
-			// [A VERIFIER]
 			resp.Ranking = nil
 			resp.Winner, _ = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)(ballot.profile)
 		case "copeland":
