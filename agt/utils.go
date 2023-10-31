@@ -1,4 +1,4 @@
-package ballotagent
+package agt
 
 import (
 	"errors"

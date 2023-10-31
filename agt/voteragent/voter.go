@@ -54,7 +54,7 @@ func (rva *RestVoterAgent) Start() {
 	err := rva.doVote()
 
 	if err != nil {
-		log.Fatal(rva.agentId, "error:", err.Error())
+		log.Fatal(rva.agentId, " error:", err.Error())
 	} else {
 		log.Printf("[%s] %s %d %d\n", rva.agentId, rva.ballotId, rva.prefs, rva.options)
 	}

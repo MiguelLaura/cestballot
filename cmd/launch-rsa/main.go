@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"ia04/agt/ballotagent"
+	"ia04-tp/agt"
 )
 
 func main() {
-	server := ballotagent.NewRestServerAgent(":8080")
+	server := agt.NewRestServerAgent(":8080")
 	server.Start()
 	fmt.Scanln()
 }

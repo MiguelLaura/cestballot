@@ -1,6 +1,5 @@
 # A corriger
 * changer les parcours de listes pour vérifier la présence d'un élément avec slices.Contains
-* revoir les launch
 * implémenter des tests sur le serveur
 
 # Hypothèses
@@ -11,3 +10,7 @@
 * Erreur quand on donne en option autre chose qu'un seul nombre dans une slice et qu'on va utiliser l'option
 * Les agtid peuvent s'abstenir
 * Quand tous les agt s'abstiennent, on renvoie le résultat à partir de tiebreak
+
+# Launch all
+* Créé des ballot avec les mêmes candidats, même tieBreak, même voter, mais des règles et deadlines différentes.
+* Les voter votent dans un seul ballot décidé aléatoirement.
