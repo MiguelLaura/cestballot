@@ -99,6 +99,33 @@ func DoNewBallot(url string, rule string, deadline string, voters []RestVoterAge
 	return
 }
 
+func (agent *RestVoterAgent) DoVote(url string, ballot string, opts []int) (res int, err error) {
+	req := rs.VoteRequest{
+		Agent:   fmt.Sprint(agent.ID),
+		Ballot:  ballot,
+		Prefs:   agent.Prefs,
+		Options: opts,
+	}
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		return
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+
+	res = resp.StatusCode
+
+	if res != 200 {
+		return res, fmt.Errorf("%d:%s", res, resp.Status)
+	}
+
+	return
+}
+
 /*
 	Handler
 */
