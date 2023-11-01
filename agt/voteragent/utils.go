@@ -1,5 +1,4 @@
 // Package voteragent contains an agent that can vote.
-
 package voteragent
 
 import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"

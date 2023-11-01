@@ -1,5 +1,4 @@
 // Package agt contains the different agents available in the project (voters and ballot)
-
 package agt
 
 import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"

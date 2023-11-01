@@ -1,5 +1,4 @@
 // Package ballotagent contains an agent representing a ballot
-
 package ballotagent
 
 import (
@@ -172,6 +171,7 @@ func (agent *RestBallotAgent) Vote(voterId string, prefs []comsoc.Alternative, o
 }
 
 // GetVoteResult returns the result of the vote.
+// If the vote is not made, the method returns 0.
 //
 // If the result cannot be returned, an error is given in a specific format : errType::errMessage.
 // The errType can be one of the follow :

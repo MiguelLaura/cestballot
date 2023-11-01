@@ -1,3 +1,4 @@
+// Package restserver handling the REST server allowing to vote
 package restserver
 
 import (
@@ -13,36 +14,29 @@ import (
 	ba "gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
 )
 
+// RestServerAgent the agent representing the REST server
 type RestServerAgent struct {
 	sync.Mutex
-	id       string
-	nbBallot int
-	addr     string
-	ballots  map[string]*ba.RestBallotAgent
+	id      string                         // The ID of the REST server
+	addr    string                         // The url of the server
+	ballots map[string]*ba.RestBallotAgent // The ballots
 }
 
-// Test du verbe HTTP utilisé
+// checkMethod tests the http verb used in the request.
 func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != method {
-		w.WriteHeader(METH_NOT_IMPL)
+		w.WriteHeader(HTTP_VERB_INCORRECT)
 		fmt.Fprintf(w, "method %q not allowed", r.Method)
 		return false
 	}
 	return true
 }
 
+// NewRestServerAgent creates a new REST Server at a given address.
 func NewRestServerAgent(id string, addr string) *RestServerAgent {
 	rst := RestServerAgent{id: id, addr: addr}
 	rst.ballots = make(map[string]*ba.RestBallotAgent)
 	return &rst
-}
-
-func (rst *RestServerAgent) genBallotAgentId() string {
-	rst.Lock()
-	defer rst.Unlock()
-	defer func() { rst.nbBallot++ }()
-
-	return fmt.Sprintf("vote%d", rst.nbBallot)
 }
 
 /*
@@ -51,6 +45,7 @@ func (rst *RestServerAgent) genBallotAgentId() string {
 	----------------------------------------
 */
 
+// decodeRequest decodes the request to a specific structure.
 func decodeRequest[T any](r *http.Request, req *T) (err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
@@ -64,11 +59,21 @@ func decodeRequest[T any](r *http.Request, req *T) (err error) {
 	----------------------------------------
 */
 
+// doNewBallot handles the new-ballot request by creating a new ballot.
+//
+// The server returns the following status code :
+// - VOTE_CREATED (201)        : OK
+// - BAD_REQUEST (400)         : incorrect Request
+// - HTTP_VERB_INCORRECT (405) : the request is not a POST request
+// - NOT_IMPL (501)            : if the voting method is not implemented
 func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
 		log.Println("doNewBallot : request is not of type POST")
 		return
 	}
+
+	// ---
+	// Handle request
 
 	var req NewBallotRequest
 
@@ -80,7 +85,10 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	newBallotId := rst.genBallotAgentId()
+	rst.Lock()
+	defer rst.Unlock()
+
+	newBallotId := fmt.Sprintf("vote%d", len(rst.ballots))
 
 	theNewBallot, err := ba.NewRestBallotAgent(
 		newBallotId,
@@ -104,6 +112,9 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// ---
+	// Handle response
+
 	err = theNewBallot.Start()
 	if err != nil {
 		log.Println("Ballot newBallotId : " + err.Error())
@@ -117,16 +128,28 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	var resp NewBallotResponse
 	resp.Id = theNewBallot.ID
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(VOTE_CREATED)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
 }
 
+// doVote handles the vote request from a voting agent.
+//
+// The server returns the following status code :
+// - VOTE_TAKEN (200)          : OK
+// - BAD_REQUEST (400)         : incorrect Request
+// - VOTE_ALREADY_DONE (403)   : vote already done by the agent
+// - HTTP_VERB_INCORRECT (405) : the request is not a POST request
+// - NOT_IMPL (501)            : if the voting method is not implemented
+// - DEADLINE_OVER (503)       : when the deadline is over
 func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
 		log.Println("doVote : request is not of type POST")
 		return
 	}
+
+	// ---
+	// Handle request
 
 	var req VoteRequest
 
@@ -150,6 +173,9 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ---
+	// Handle response
+
 	_, err = ballotAgent.Vote(req.Agent, req.Prefs, req.Options)
 	if err != nil {
 		log.Println("Vote : " + err.Error())
@@ -170,15 +196,25 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(VOTE_TAKEN)
 	fmt.Fprint(w, "Vote accepted !")
 }
 
+// doResult handles the result request to a specific ballot.
+//
+// The server returns the following status code :
+// - RESULT_OBTAINED (200)     : OK
+// - NOT_FOUND (404)           : the ballot or the result is not found
+// - HTTP_VERB_INCORRECT (405) : the request is not a POST request
+// - TOO_EARLY (425)           : the deadline of the ballot is not passed
 func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
 		log.Println("doVote : request is not of type POST")
 		return
 	}
+
+	// ---
+	// Handle request
 
 	var req ResultRequest
 
@@ -197,10 +233,13 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	if !exists {
 		log.Println("Error, ballot " + req.Ballot + " does not exist")
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(NOT_FOUND)
 		fmt.Fprintf(w, "JSON ballot %q does not exist", req.Ballot)
 		return
 	}
+
+	// ---
+	// Handle response
 
 	res, err := ballotAgent.GetVoteResult()
 	if err != nil {
@@ -215,14 +254,14 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	if res == 0 {
 		log.Println("Result not found...")
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(NOT_FOUND)
 		fmt.Fprint(w, "Result not found")
 	}
 
 	var resp ResultResponse
 	resp.Winner = res
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(RESULT_OBTAINED)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
 }
@@ -234,14 +273,16 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 ----------------------------------------
 */
+
+// Start starts the REST server.
 func (rst *RestServerAgent) Start() {
-	// création du multiplexer
+	// Create the multiplexer to redirect the requests
 	mux := http.NewServeMux()
 	mux.HandleFunc("/new-ballot", rst.doNewBallot)
 	mux.HandleFunc("/vote", rst.doVote)
 	mux.HandleFunc("/result", rst.doResult)
 
-	// création du serveur http
+	// Creates the HTTP server
 	s := &http.Server{
 		Addr:           rst.addr,
 		Handler:        mux,
@@ -249,7 +290,7 @@ func (rst *RestServerAgent) Start() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20}
 
-	// lancement du serveur
+	// Starts the server
 	log.Println("Listening on", rst.addr)
 	go log.Fatal(s.ListenAndServe())
 }
