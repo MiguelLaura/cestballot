@@ -154,7 +154,7 @@ func (agent *RestVoterAgent) DoVote(ballot string, opts []int) (res int, err err
 	res = resp.StatusCode
 
 	if res != 200 {
-		return res, fmt.Errorf("%d:%s", res, resp.Status)
+		return res, fmt.Errorf("%d::%s", res, resp.Status)
 	}
 
 	return
@@ -185,7 +185,7 @@ func DoResult(servUrl string, ballot string) (res rs.ResultResponse, err error) 
 	}
 
 	if resp.StatusCode != 200 {
-		return res, fmt.Errorf("%d:%s", resp.StatusCode, resp.Status)
+		return res, fmt.Errorf("%d::%s", resp.StatusCode, resp.Status)
 	}
 
 	decodeResponse[rs.ResultResponse](resp, &res)
