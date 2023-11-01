@@ -1,4 +1,4 @@
-// Package voteragent contains an agent that can vote
+// Package voteragent contains an agent that can vote.
 
 package voteragent
 
