@@ -23,7 +23,7 @@ The flags are:
 		Specify the preferences of the agent.
 		Format : alt1,alt2,alt3,...
 		Default : 1,2,4,3
-	--opts listOfAlternatives
+	--opts listOfOptions
 		Specify the optional vote parameters of the agent.
 		Format : opt1,opt2,...
 		Default :
