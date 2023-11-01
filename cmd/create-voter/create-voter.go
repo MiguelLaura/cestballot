@@ -1,3 +1,36 @@
+/*
+create-voter creates a new voter which votes and waits for the result.
+
+Usage :
+
+	create-voter [flags]
+
+The flags are:
+
+	--host hostName
+		Specify the url of the host.
+		Default : http://localhost
+	--port portNumber
+		Specify the number of the port to which the server listens.
+		Default : 8080
+	--id agentID
+		Specify the ID of the agent.
+		Default : ag_id1
+	--name agentName
+		Specify the name of the agent.
+		Default : ag_id1
+	--prefs listOfAlternatives
+		Specify the preferences of the agent.
+		Format : alt1,alt2,alt3,...
+		Default : 1,2,4,3
+	--opts listOfAlternatives
+		Specify the optional vote parameters of the agent.
+		Format : opt1,opt2,...
+		Default :
+	--ballot ballotId
+		Specify the ballot to which the agent votes.
+		Default : vote0
+*/
 package main
 
 import (

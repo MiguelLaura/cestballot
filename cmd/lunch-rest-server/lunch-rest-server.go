@@ -1,3 +1,21 @@
+/*
+lunch-rest-server starts the REST server to which the users connect to create Ballots and to vote
+
+Usage :
+
+	lunch-rest-server [flags]
+
+The flags are:
+
+	--host hostName
+		Specify the name of the host.
+		Default : localhost
+	--port portNumber
+		Specify the number of the port to which the server listens.
+		Default : 8080
+	-v
+		Starts the server in verbose mode.
+*/
 package main
 
 import (
