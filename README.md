@@ -62,7 +62,6 @@ Avec les flags suivants :
 ### Création d'agents voteurs
 
 ```
-
 	create-voter [flags]
 
 Avec les flags suivants : 
