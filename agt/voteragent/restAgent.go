@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"slices"
 
 	"gitlab.utc.fr/mennynat/ia04-tp/agt"
 	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
@@ -80,18 +79,20 @@ func decodeResponse[T any](r *http.Response, req *T) (err error) {
 // - 2   : if the request cannot be made
 // - 400 : if the request is incorrect
 // - 501 : if the requested voting rule is not supported
-func DoNewBallot(servUrl string, rule string, deadline string, votersID []string, tieBreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
+func DoNewBallot(servUrl string, rule string, deadline string, votersID []string, tiebreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
 
 	if len(votersID) == 0 {
 		return res, errors.New("0::Cannot create new ballot without any voters")
 	}
 
+	nbAlts := len(tiebreak)
+
 	req := rs.NewBallotRequest{
 		Rule:     rule,
 		Deadline: deadline,
 		Voters:   votersID,
-		Alts:     int(slices.Max(tieBreak)),
-		TieBreak: tieBreak,
+		Alts:     nbAlts,
+		TieBreak: tiebreak,
 	}
 
 	data, err := json.Marshal(req)
@@ -99,7 +100,7 @@ func DoNewBallot(servUrl string, rule string, deadline string, votersID []string
 		return res, fmt.Errorf("1::%s", err.Error())
 	}
 
-	url := fmt.Sprintf("%s/new_ballot", servUrl)
+	url := fmt.Sprintf("%s/new-ballot", servUrl)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return res, fmt.Errorf("2::%s", err.Error())

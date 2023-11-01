@@ -20,10 +20,18 @@ type RestServerAgent struct {
 	id      string                         // The ID of the REST server
 	addr    string                         // The url of the server
 	ballots map[string]*ba.RestBallotAgent // The ballots
+	verbose bool                           // <tt>true</tt> if the server is verbose, <tt>false</tt> else
+}
+
+// NewRestServerAgent creates a new REST Server at a given address.
+func NewRestServerAgent(id string, addr string) *RestServerAgent {
+	rst := RestServerAgent{id: id, addr: addr}
+	rst.ballots = make(map[string]*ba.RestBallotAgent)
+	return &rst
 }
 
 // checkMethod tests the http verb used in the request.
-func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r *http.Request) bool {
+func (rst *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != method {
 		w.WriteHeader(HTTP_VERB_INCORRECT)
 		fmt.Fprintf(w, "method %q not allowed", r.Method)
@@ -32,11 +40,14 @@ func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r 
 	return true
 }
 
-// NewRestServerAgent creates a new REST Server at a given address.
-func NewRestServerAgent(id string, addr string) *RestServerAgent {
-	rst := RestServerAgent{id: id, addr: addr}
-	rst.ballots = make(map[string]*ba.RestBallotAgent)
-	return &rst
+func (rst *RestServerAgent) SetVerbose(verbose bool) {
+	rst.verbose = verbose
+}
+
+func (rst *RestServerAgent) log(messages ...any) {
+	if rst.verbose {
+		log.Println(messages...)
+	}
 }
 
 /*
@@ -68,7 +79,7 @@ func decodeRequest[T any](r *http.Request, req *T) (err error) {
 // - NOT_IMPL (501)            : if the voting method is not implemented
 func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
-		log.Println("doNewBallot : request is not of type POST")
+		rst.log("doNewBallot : request is not of type POST")
 		return
 	}
 
@@ -79,7 +90,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 
 	err := decodeRequest(r, &req)
 	if err != nil {
-		log.Println(err)
+		rst.log("doNewBallot : ", err.Error())
 		w.WriteHeader(BAD_REQUEST)
 		fmt.Fprint(w, "JSON request string incorrect format")
 		return
@@ -100,7 +111,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	)
 
 	if err != nil {
-		log.Println("Ballot newBallotId : " + err.Error())
+		rst.log("doNewBallot : ", err.Error())
 		switch strings.Split(err.Error(), "::")[0] {
 		case "1", "2", "3":
 			w.WriteHeader(BAD_REQUEST)
@@ -117,7 +128,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 
 	err = theNewBallot.Start()
 	if err != nil {
-		log.Println("Ballot newBallotId : " + err.Error())
+		rst.log("doNewBallot : ", err.Error())
 		w.WriteHeader(BAD_REQUEST)
 		fmt.Fprint(w, "The deadline is in the past")
 		return
@@ -131,6 +142,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(VOTE_CREATED)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
+	rst.log("doNewBallot : ballot '" + newBallotId + "' created")
 }
 
 // doVote handles the vote request from a voting agent.
@@ -144,7 +156,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 // - DEADLINE_OVER (503)       : when the deadline is over
 func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
-		log.Println("doVote : request is not of type POST")
+		rst.log("doVote : request is not of type POST")
 		return
 	}
 
@@ -155,7 +167,7 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 
 	err := decodeRequest(r, &req)
 	if err != nil {
-		log.Println(err)
+		rst.log("doVote : ", err.Error())
 		w.WriteHeader(BAD_REQUEST)
 		fmt.Fprint(w, "JSON request string incorrect format")
 		return
@@ -167,7 +179,7 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	ballotAgent, exists := rst.ballots[req.Ballot]
 
 	if !exists {
-		log.Println("Error, ballot " + req.Ballot + " does not exist")
+		rst.log("doVote : ballot '" + req.Ballot + "' does not exist")
 		w.WriteHeader(BAD_REQUEST)
 		fmt.Fprintf(w, "JSON ballot %q does not exist", req.Ballot)
 		return
@@ -178,7 +190,7 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 
 	_, err = ballotAgent.Vote(req.Agent, req.Prefs, req.Options)
 	if err != nil {
-		log.Println("Vote : " + err.Error())
+		rst.log("doVote : ", err.Error())
 		switch strings.Split(err.Error(), "::")[0] {
 		case "1":
 			w.WriteHeader(DEADLINE_OVER)
@@ -198,6 +210,7 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(VOTE_TAKEN)
 	fmt.Fprint(w, "Vote accepted !")
+	rst.log(fmt.Sprintf("doVote : vote accepted for agent %q to ballot %q", req.Agent, req.Ballot))
 }
 
 // doResult handles the result request to a specific ballot.
@@ -209,7 +222,7 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 // - TOO_EARLY (425)           : the deadline of the ballot is not passed
 func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	if !rst.checkMethod("POST", w, r) {
-		log.Println("doVote : request is not of type POST")
+		rst.log("doResult : request is not of type POST")
 		return
 	}
 
@@ -220,7 +233,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	err := decodeRequest(r, &req)
 	if err != nil {
-		log.Println(err)
+		rst.log("doResult : ", err.Error())
 		w.WriteHeader(BAD_REQUEST)
 		fmt.Fprint(w, "JSON request string incorrect format")
 		return
@@ -232,7 +245,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	ballotAgent, exists := rst.ballots[req.Ballot]
 
 	if !exists {
-		log.Println("Error, ballot " + req.Ballot + " does not exist")
+		rst.log("doVote : ballot '" + req.Ballot + "' does not exist")
 		w.WriteHeader(NOT_FOUND)
 		fmt.Fprintf(w, "JSON ballot %q does not exist", req.Ballot)
 		return
@@ -243,7 +256,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	res, err := ballotAgent.GetVoteResult()
 	if err != nil {
-		log.Println("Result : " + err.Error())
+		rst.log("doResult : ", err.Error())
 		switch strings.Split(err.Error(), "::")[0] {
 		case "1":
 			w.WriteHeader(TOO_EARLY)
@@ -253,7 +266,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if res == 0 {
-		log.Println("Result not found...")
+		rst.log("doResult : Result not found... for ballot '" + req.Ballot + "'")
 		w.WriteHeader(NOT_FOUND)
 		fmt.Fprint(w, "Result not found")
 	}
@@ -264,6 +277,8 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(RESULT_OBTAINED)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
+
+	rst.log(fmt.Sprintf("doResult : for ballot %q, the result is %d", req.Ballot, res))
 }
 
 /*

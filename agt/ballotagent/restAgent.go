@@ -259,7 +259,7 @@ func (agent *RestBallotAgent) Start() error {
 
 		err := agent.processVote()
 		if err != nil {
-			log.Printf(err.Error())
+			log.Println(agent.ID, err.Error())
 		}
 	}()
 

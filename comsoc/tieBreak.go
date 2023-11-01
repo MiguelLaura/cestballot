@@ -78,6 +78,9 @@ func SCFFactory(
 ) func(Profile) (Alternative, error) {
 
 	return func(p Profile) (Alternative, error) {
+		if len(p) == 0 {
+			return tiebreak([]Alternative{})
+		}
 		bestAlts, err := scf(p)
 		if err != nil {
 			return 0, err
