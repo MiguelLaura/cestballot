@@ -61,7 +61,7 @@ func decodeResponse[T any](r *http.Response, req *T) (err error) {
 	HTTP requesters
 */
 
-func DoNewBallot(url string, rule string, deadline string, voters []RestVoterAgent, tieBreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
+func DoNewBallot(servUrl string, rule string, deadline string, voters []RestVoterAgent, tieBreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
 
 	if len(voters) == 0 {
 		return res, errors.New("0:Cannot create new ballot without any voters")
@@ -85,7 +85,7 @@ func DoNewBallot(url string, rule string, deadline string, voters []RestVoterAge
 		return
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	resp, err := http.Post(fmt.Sprintf("%s/new_ballot", servUrl), "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return
 	}
@@ -99,7 +99,7 @@ func DoNewBallot(url string, rule string, deadline string, voters []RestVoterAge
 	return
 }
 
-func (agent *RestVoterAgent) DoVote(url string, ballot string, opts []int) (res int, err error) {
+func (agent *RestVoterAgent) DoVote(servUrl string, ballot string, opts []int) (res int, err error) {
 	req := rs.VoteRequest{
 		Agent:   fmt.Sprint(agent.ID),
 		Ballot:  ballot,
@@ -112,7 +112,7 @@ func (agent *RestVoterAgent) DoVote(url string, ballot string, opts []int) (res 
 		return
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	resp, err := http.Post(fmt.Sprintf("%s/vote", servUrl), "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return
 	}
@@ -126,7 +126,7 @@ func (agent *RestVoterAgent) DoVote(url string, ballot string, opts []int) (res 
 	return
 }
 
-func (agent *RestVoterAgent) DoResult(url string, ballot string) (res rs.ResultResponse, err error) {
+func DoResult(servUrl string, ballot string) (res rs.ResultResponse, err error) {
 	req := rs.ResultRequest{
 		Ballot: ballot,
 	}
@@ -136,7 +136,7 @@ func (agent *RestVoterAgent) DoResult(url string, ballot string) (res rs.ResultR
 		return
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	resp, err := http.Post(fmt.Sprintf("%s/result", servUrl), "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return
 	}
