@@ -80,23 +80,17 @@ func decodeResponse[T any](r *http.Response, req *T) (err error) {
 // - 2   : if the request cannot be made
 // - 400 : if the request is incorrect
 // - 501 : if the requested voting rule is not supported
-func DoNewBallot(servUrl string, rule string, deadline string, voters []RestVoterAgent, tieBreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
+func DoNewBallot(servUrl string, rule string, deadline string, votersID []string, tieBreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
 
-	if len(voters) == 0 {
+	if len(votersID) == 0 {
 		return res, errors.New("0::Cannot create new ballot without any voters")
-	}
-
-	// Creates a slice with every voter's ID
-	votersIDs := make([]string, len(voters))
-	for voterIdx, currVoter := range voters {
-		votersIDs[voterIdx] = fmt.Sprint(currVoter.ID)
 	}
 
 	req := rs.NewBallotRequest{
 		Rule:     rule,
 		Deadline: deadline,
-		Voters:   votersIDs,
-		Alts:     int(slices.Max(voters[0].Prefs)),
+		Voters:   votersID,
+		Alts:     int(slices.Max(tieBreak)),
 		TieBreak: tieBreak,
 	}
 
