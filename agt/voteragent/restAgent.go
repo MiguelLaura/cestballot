@@ -31,19 +31,19 @@ func NewRestVoterAgent(id agt.AgentID, name string, prefs []comsoc.Alternative, 
 	Basic Agent methods (from AgentI interface)
 */
 
-// Equal indicates if two RestVoterAgents have the same ID and Name.
+// Equal indicates if two RestVoterAgents have the same ID, Name and server url.
 func (agent *RestVoterAgent) Equal(agent2 RestVoterAgent) bool {
-	return agent.ID == agent2.ID && agent.Name == agent2.Name
+	return agent.ID == agent2.ID && agent.Name == agent2.Name && agent.url == agent2.url
 }
 
-// DeepEqual indicates if two RestVoterAgents have the same ID, Name and preferences.
+// DeepEqual indicates if two RestVoterAgents have the same ID, Name, server url and preferences.
 func (agent *RestVoterAgent) DeepEqual(agent2 RestVoterAgent) bool {
 	return agent.Equal(agent2) && concurrent.Equal(agent.Prefs, agent2.Prefs)
 }
 
 // Clone creates a duplicate of the current agent.
 func (agent *RestVoterAgent) Clone() RestVoterAgent {
-	return *NewRestVoterAgent(agent.ID, agent.Name, agent.Prefs)
+	return *NewRestVoterAgent(agent.ID, agent.Name, agent.Prefs, agent.url)
 }
 
 // String gives a string representation of the voting agent.
