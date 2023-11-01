@@ -50,7 +50,7 @@ func (agent *RestVoterAgent) Prefers(a comsoc.Alternative, b comsoc.Alternative)
 	HTTP response decoder
 */
 
-func decodeRequest[T any](r *http.Response, req *T) (err error) {
+func decodeResponse[T any](r *http.Response, req *T) (err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
@@ -94,7 +94,7 @@ func DoNewBallot(url string, rule string, deadline string, voters []RestVoterAge
 		return res, fmt.Errorf("%d:%s", resp.StatusCode, resp.Status)
 	}
 
-	decodeRequest[rs.NewBallotResponse](resp, &res)
+	decodeResponse[rs.NewBallotResponse](resp, &res)
 
 	return
 }
@@ -122,6 +122,30 @@ func (agent *RestVoterAgent) DoVote(url string, ballot string, opts []int) (res 
 	if res != 200 {
 		return res, fmt.Errorf("%d:%s", res, resp.Status)
 	}
+
+	return
+}
+
+func (agent *RestVoterAgent) DoResult(url string, ballot string) (res rs.ResultResponse, err error) {
+	req := rs.ResultRequest{
+		Ballot: ballot,
+	}
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		return
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode != 200 {
+		return res, fmt.Errorf("%d:%s", resp.StatusCode, resp.Status)
+	}
+
+	decodeResponse[rs.ResultResponse](resp, &res)
 
 	return
 }
