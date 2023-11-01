@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"gitlab.utc.fr/mennynat/ia04-tp/agt"
 	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
@@ -17,12 +19,44 @@ import (
 // The voting agent structure.
 type RestVoterAgent struct {
 	agt.Agent
-	url string // The url of the server where the voter votes
+	url  string // The url of the server where the voter votes
+	opts []int  // The optional data to send to specific voting methods
 }
 
 // NewRestVoterAgent creates a new voting agent.
-func NewRestVoterAgent(id agt.AgentID, name string, prefs []comsoc.Alternative, url string) *RestVoterAgent {
-	return &RestVoterAgent{agt.Agent{ID: id, Name: name, Prefs: prefs}, url}
+func NewRestVoterAgent(id string, name string, prefs []comsoc.Alternative, opts []int, url string) *RestVoterAgent {
+	return &RestVoterAgent{agt.Agent{ID: id, Name: name, Prefs: prefs}, url, opts}
+}
+
+// likeLevelOfVote gives a level of likeness of the agent and the given alternative.
+//
+// The likeness is an int from -1 to 3 with the following meaning :
+// - -1 : unknown
+// - 0 : likes it a lot
+// - 1 : likes a bit
+// - 2 : dislikes it a bit
+// - 3 : dislikes it a lot
+func (agent *RestVoterAgent) likeLevelOfAlt(alt comsoc.Alternative) int {
+	altRank := 0
+	for altRank < len(agent.Prefs) && agent.Prefs[altRank] != alt {
+		altRank++
+	}
+
+	if altRank >= len(agent.Prefs) {
+		return -1
+	}
+
+	quarter, half := int(len(agent.Prefs)/4), int(len(agent.Prefs)/2)
+
+	if altRank < quarter {
+		return 0
+	} else if altRank < half {
+		return 1
+	} else if altRank < half+quarter {
+		return 2
+	} else {
+		return 3
+	}
 }
 
 /*
@@ -41,12 +75,12 @@ func (agent *RestVoterAgent) DeepEqual(agent2 RestVoterAgent) bool {
 
 // Clone creates a duplicate of the current agent.
 func (agent *RestVoterAgent) Clone() RestVoterAgent {
-	return *NewRestVoterAgent(agent.ID, agent.Name, agent.Prefs, agent.url)
+	return *NewRestVoterAgent(agent.ID, agent.Name, agent.Prefs, agent.opts, agent.url)
 }
 
 // String gives a string representation of the voting agent.
 func (agent *RestVoterAgent) String() string {
-	return fmt.Sprintf("%d : %s", agent.ID, agent.Name)
+	return fmt.Sprintf("%s : %s", agent.ID, agent.Name)
 }
 
 // Prefers indicates if the agent prefers the alternative a to the b.
@@ -107,7 +141,7 @@ func DoNewBallot(servUrl string, rule string, deadline string, votersID []string
 	}
 
 	if resp.StatusCode != 201 {
-		return res, fmt.Errorf("%d::%s", resp.StatusCode, resp.Status)
+		return res, fmt.Errorf("%d", resp.StatusCode)
 	}
 
 	decodeResponse[rs.NewBallotResponse](resp, &res)
@@ -126,12 +160,12 @@ func DoNewBallot(servUrl string, rule string, deadline string, votersID []string
 // - 403 : if the voter already voted
 // - 501 : if the requested voting rule is not supported
 // - 503 : if the deadline is passed
-func (agent *RestVoterAgent) DoVote(ballot string, opts []int) (res int, err error) {
+func (agent *RestVoterAgent) DoVote(ballot string) (res int, err error) {
 	req := rs.VoteRequest{
 		Agent:   fmt.Sprint(agent.ID),
 		Ballot:  ballot,
 		Prefs:   agent.Prefs,
-		Options: opts,
+		Options: agent.opts,
 	}
 
 	data, err := json.Marshal(req)
@@ -148,7 +182,7 @@ func (agent *RestVoterAgent) DoVote(ballot string, opts []int) (res int, err err
 	res = resp.StatusCode
 
 	if res != 200 {
-		return res, fmt.Errorf("%d::%s", res, resp.Status)
+		return res, fmt.Errorf("%d", res)
 	}
 
 	return
@@ -179,7 +213,7 @@ func DoResult(servUrl string, ballot string) (res rs.ResultResponse, err error) 
 	}
 
 	if resp.StatusCode != 200 {
-		return res, fmt.Errorf("%d::%s", resp.StatusCode, resp.Status)
+		return res, fmt.Errorf("%d", resp.StatusCode)
 	}
 
 	decodeResponse[rs.ResultResponse](resp, &res)
@@ -191,8 +225,33 @@ func DoResult(servUrl string, ballot string) (res rs.ResultResponse, err error) 
 	Handler
 */
 
-func (agent *RestVoterAgent) Start() {
-	go func() {
+// Starts the voter to vote to the specified ballot.
+func (agent *RestVoterAgent) Start(ballot string) {
+	voteRes, err := agent.DoVote(ballot)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	}()
+	log.Printf("[%d] : vote success for agent %q to ballot %q\n", voteRes, agent.ID, ballot)
+
+	// Wait for the results
+	res, err := DoResult(agent.url, ballot)
+	for err != nil {
+		time.Sleep(10 * time.Second)
+		res, err = DoResult(agent.url, ballot)
+	}
+
+	log.Printf("%d has won the vote on ballot %q !\n", res.Winner, ballot)
+	switch agent.likeLevelOfAlt(res.Winner) {
+	case -1:
+		log.Printf("agent %q does not know where this result came from 🤨", agent.ID)
+	case 0:
+		log.Printf("agent %q is very happy with the result 😄", agent.ID)
+	case 1:
+		log.Printf("agent %q is quite happy with the result 🙂", agent.ID)
+	case 2:
+		log.Printf("agent %q is quite sad with the result 🙁", agent.ID)
+	case 3:
+		log.Printf("agent %q is very sad with the result 😢", agent.ID)
+	}
 }

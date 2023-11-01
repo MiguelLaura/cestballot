@@ -256,11 +256,12 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	res, err := ballotAgent.GetVoteResult()
 	if err != nil {
-		rst.log("doResult : ", err.Error())
 		switch strings.Split(err.Error(), "::")[0] {
 		case "1":
 			w.WriteHeader(TOO_EARLY)
 			fmt.Fprint(w, "It's too early for the result, wait a bit")
+		default:
+			rst.log("doResult : ", err.Error())
 		}
 		return
 	}

@@ -3,12 +3,9 @@ package agt
 
 import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 
-// The type of the Agent identifier.
-type AgentID int
-
 // A simple voting agent.
 type Agent struct {
-	ID    AgentID              // The ID of the agent; must be unique
+	ID    string               // The ID of the agent; must be unique
 	Name  string               // The Name of the agent
 	Prefs []comsoc.Alternative // The preferences of the agent ordered from the most to the least preferred.
 }

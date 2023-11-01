@@ -83,6 +83,11 @@ func NewRestBallotAgent(id string,
 	}
 
 	theVoters := make(map[string][]comsoc.Alternative)
+	theVotersOpts := make(map[string][]int)
+	for _, voter := range voters {
+		theVoters[voter] = nil
+		theVotersOpts[voter] = nil
+	}
 
 	ctx := context.Background()
 
@@ -92,7 +97,7 @@ func NewRestBallotAgent(id string,
 		voteType,
 		deadlineTime,
 		theVoters,
-		make(map[string][]int),
+		theVotersOpts,
 		nbAlts,
 		ctx,
 		tieBreaks,
@@ -140,15 +145,15 @@ func (agent *RestBallotAgent) Vote(voterId string, prefs []comsoc.Alternative, o
 	defer agent.Unlock()
 
 	if agent.IsClosed() {
-		return false, errors.New(fmt.Sprintf("1::%q is closed", agent.String()))
+		return false, fmt.Errorf("1::%q is closed", agent.String())
 	}
 
 	if _, exists := agent.Voters[voterId]; !exists {
-		return false, errors.New(fmt.Sprintf("2::Agent %q cannot vote here", voterId))
+		return false, fmt.Errorf("2::Agent %q cannot vote here", voterId)
 	}
 
 	if agent.Voters[voterId] != nil {
-		return false, errors.New(fmt.Sprintf("3::Agent %q already voted", voterId))
+		return false, fmt.Errorf("3::Agent %q already voted", voterId)
 	}
 
 	// Checks if the preferences are correct (no duplicate, all the values between 1 and agent.nbAlts)
@@ -181,7 +186,7 @@ func (agent *RestBallotAgent) GetVoteResult() (comsoc.Alternative, error) {
 	defer agent.Unlock()
 
 	if !agent.IsClosed() {
-		return 0, errors.New(fmt.Sprintf("1::%q is not closed", agent.String()))
+		return 0, fmt.Errorf("1::%q is not closed", agent.String())
 	}
 
 	return agent.res, nil
@@ -192,13 +197,13 @@ func (agent *RestBallotAgent) processVote() (err error) {
 	agent.Lock()
 	defer agent.Unlock()
 
-	voteProfile := make(comsoc.Profile, len(agent.Voters))
-	voteOpts := make([][]int, len(agent.VotersOpts))
-	idx := 0
+	voteProfile := make(comsoc.Profile, 0)
+	voteOpts := make([][]int, 0)
 	for voterId, prefs := range agent.Voters {
-		voteProfile[idx] = prefs
-		voteOpts[idx] = agent.VotersOpts[voterId]
-		idx++
+		if len(prefs) != 0 {
+			voteProfile = append(voteProfile, prefs)
+			voteOpts = append(voteOpts, agent.VotersOpts[voterId])
+		}
 	}
 
 	// Gets the SCF corresponding to the ballot voting method
@@ -216,7 +221,12 @@ func (agent *RestBallotAgent) processVote() (err error) {
 		chosenSCF = func(p comsoc.Profile) ([]comsoc.Alternative, error) {
 			thresholds := make([]int, len(voteOpts))
 			for idx := range voteOpts {
-				thresholds[idx] = voteOpts[idx][0]
+				if len(voteOpts[idx]) == 0 {
+					thresholds[idx] = 1
+				} else {
+					thresholds[idx] = voteOpts[idx][0]
+				}
+
 			}
 
 			return comsoc.ApprovalSCF(p, thresholds)
