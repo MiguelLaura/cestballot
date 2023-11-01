@@ -1,20 +1,5 @@
+// Package comsoc handles the voting methods.
 package comsoc
-
-/* func generateCombinations(alts []Alternative) chan []Alternative {
-	chnl := make(chan []Alternative)
-
-	go func() {
-		defer close(chnl)
-
-		for idxAlt1 := 0; idxAlt1 < len(alts)-1; idxAlt1++ {
-			for idxAlt2 := idxAlt1 + 1; idxAlt2 < len(alts); idxAlt2++ {
-				chnl <- []Alternative{alts[idxAlt1], alts[idxAlt2]}
-			}
-		}
-	}()
-
-	return chnl
-} */
 
 // Generates all the possible alternative combinations at a certain level (i.e. number of elements per combination)
 func generateCombinations(alts []Alternative, level int) chan []Alternative {
@@ -32,6 +17,7 @@ func generateCombinations(alts []Alternative, level int) chan []Alternative {
 	return chnl
 }
 
+// Generates all the possible combinations recursively.
 func generateCombinationsRec(alts []Alternative, level int, chnl chan []Alternative, combiAlts ...Alternative) {
 	switch level {
 	case 1:
@@ -55,7 +41,8 @@ func generateCombinationsRec(alts []Alternative, level int, chnl chan []Alternat
 	}
 }
 
-func scoring(p Profile) (resDuel Count, err error) {
+// Makes duel between every combination of alternatives and gives the count of every one of them.
+func duel(p Profile) (resDuel Count, err error) {
 	if err = checkProfileAlternative(p, p[0]); err != nil {
 		return
 	}
@@ -67,6 +54,7 @@ func scoring(p Profile) (resDuel Count, err error) {
 		resDuel[alt] = 0
 	}
 
+	// Duels every combination of alternatives
 	for combi := range generateCombinations(alts, 2) {
 		scoreA, scoreB := 0, 0
 		a, b := combi[0], combi[1]

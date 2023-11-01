@@ -1,7 +1,12 @@
+// Package comsoc handles the voting methods.
+//
+// Handles the Approval voting method.
 package comsoc
 
 import "errors"
 
+// ApprovalSWF provides the Social Welfare Function of approval method.
+// The thresholds of each voter are provided to know where they stop voting.
 func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
 	if err = checkProfileAlternative(p, p[0]); err != nil {
 		return nil, err
@@ -13,9 +18,10 @@ func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
 
 	count = make(Count)
 
-	for indiv, prefs := range p {
+	// Process the vote for each agent
+	for voter, prefs := range p {
 		for rankPref, pref := range prefs {
-			if rankPref >= thresholds[indiv] {
+			if rankPref >= thresholds[voter] {
 				break
 			}
 
@@ -29,6 +35,8 @@ func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
 	return
 }
 
+// ApprovalSCF provides the Social Choice Function of approval method.
+// The thresholds of each voter are provided to know where they stop voting.
 func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error) {
 	count, err := ApprovalSWF(p, thresholds)
 

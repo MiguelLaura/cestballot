@@ -1,16 +1,24 @@
+// Package comsoc handles the voting methods.
+//
+// Handles tiebreaks with SCF and SWF.
 package comsoc
 
 import (
 	"errors"
 )
 
-// Creates a simple tie break that returns the first best alternative
+// TieBreakFactory creates a simple tiebreak that returns the first best alternative.
 func TieBreakFactory(allAlts []Alternative) func([]Alternative) (alt Alternative, err error) {
 
 	return func(currAlts []Alternative) (alt Alternative, err error) {
-		if len(currAlts) == 0 || len(allAlts) == 0 {
+		if len(currAlts) == 0 && len(allAlts) == 0 {
 			return 0, errors.New("no alternatives")
 		}
+
+		if len(currAlts) == 0 {
+			return allAlts[0], nil
+		}
+
 		alt = currAlts[0]
 
 		for altIdx := 1; altIdx < len(currAlts); altIdx++ {
@@ -24,6 +32,7 @@ func TieBreakFactory(allAlts []Alternative) func([]Alternative) (alt Alternative
 
 }
 
+// SWFFactory creates a SWF without doubles.
 func SWFFactory(
 	swf func(Profile) (Count, error),
 	tiebreak func([]Alternative) (Alternative, error),
@@ -62,6 +71,7 @@ func SWFFactory(
 	}
 }
 
+// SCFFactory creates a SCF returning the one best alternative.
 func SCFFactory(
 	scf func(Profile) ([]Alternative, error),
 	tiebreak func([]Alternative) (Alternative, error),

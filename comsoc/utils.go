@@ -1,3 +1,6 @@
+// Package comsoc handles the voting methods.
+//
+// Contains useful functions to help creating votes.
 package comsoc
 
 import (
@@ -5,7 +8,7 @@ import (
 	"slices"
 )
 
-// renvoie l'indice ou se trouve alt dans prefs
+// rank returns the index in the preferences of the given alternative.
 func rank(alt Alternative, prefs []Alternative) int {
 	for index, value := range prefs {
 		if value == alt {
@@ -16,13 +19,13 @@ func rank(alt Alternative, prefs []Alternative) int {
 	return -1
 }
 
-// renvoie vrai ssi alt1 est préférée à alt2
+// isPref indicates is alt1 is preferred to alt2 given a specific preference.
 func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
 	rk1, rk2 := rank(alt1, prefs), rank(alt2, prefs)
 	return rk1 != -1 && rk2 != -1 && rk1 < rk2
 }
 
-// renvoie les meilleures alternatives pour un décomtpe donné
+// maxCount provides the best alternatives.
 func maxCount(count Count) (bestAlts []Alternative) {
 	bestAlts = make([]Alternative, 0)
 	bestCnt := 0
@@ -38,7 +41,12 @@ func maxCount(count Count) (bestAlts []Alternative) {
 	return
 }
 
-func checkDoublons(pref []Alternative) bool {
+// checkDuplicate indicates if there are duplicates in the alternatives.
+func checkDuplicate(pref []Alternative) bool {
+	if len(pref) <= 1 {
+		return false
+	}
+
 	cpPref := make([]Alternative, len(pref))
 	copy(cpPref, pref)
 	slices.Sort(cpPref)
@@ -52,6 +60,7 @@ func checkDoublons(pref []Alternative) bool {
 	return false
 }
 
+// equals indicates if two preferences have the same elements (in the same order or not).
 func equals(pref1 []Alternative, pref2 []Alternative) bool {
 	if len(pref1) != len(pref2) {
 		return false
@@ -72,23 +81,14 @@ func equals(pref1 []Alternative, pref2 []Alternative) bool {
 	return true
 }
 
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois par préférences
-/* func checkProfile(prefs Profile) error {
-	if len(prefs) == 0 {
-		return nil
-	}
-
-	return checkProfileAlternative(prefs[1:], prefs[0])
-} */
-
-// vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparait qu'une seule fois
+// CheckProfile checks if the given preference is correct.
 func CheckProfile(prefs []Alternative, alts []Alternative) error {
 	if len(prefs) == 0 && len(alts) == 0 {
 		return nil
 	}
 
 	// Checks if the current individual has two identical individuals
-	if checkDoublons(prefs) {
+	if checkDuplicate(prefs) {
 		return errors.New("two same alternatives found for the same individual")
 	}
 
@@ -100,11 +100,11 @@ func CheckProfile(prefs []Alternative, alts []Alternative) error {
 	return nil
 }
 
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
+// checkProfileAlternative checks if every profiles are correct.
 func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 
 	// Checks if there are two times the same alternative in the alts slice
-	if checkDoublons(alts) {
+	if checkDuplicate(alts) {
 		return errors.New("two same alternatives found in the alts slice")
 	}
 
@@ -117,34 +117,3 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 
 	return nil
 }
-
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
-/* func checkProfileAlternative(prefs Profile, alts []Alternative) error {
-	if len(prefs) == 0 {
-		return nil
-	}
-
-	// Checks if the first individual has two times the same alternative
-	if checkDoublons(alts) {
-		return errors.New("two same alternatives found for the same individual")
-	}
-
-	alternatives := alts
-
-	// Checks for the other individuals
-	for indiv := 0; indiv < len(prefs); indiv++ {
-		prefsIndiv := prefs[indiv]
-
-		// Checks if the current individual has two identical individuals
-		if checkDoublons(prefsIndiv) {
-			return errors.New("two same alternatives found for the same individual")
-		}
-
-		// Checks if the current individual does not have the same alternatives as the others
-		if !equals(alternatives, prefsIndiv) {
-			return errors.New("at least one alternative does not exist in the other profiles")
-		}
-	}
-
-	return nil
-} */

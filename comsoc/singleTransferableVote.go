@@ -1,5 +1,9 @@
+// Package comsoc handles the voting methods.
+//
+// Handles the STV voting method.
 package comsoc
 
+// removeAlt removes an alternative of a list of alternative
 func removeAlt(alt Alternative, alts []Alternative) []Alternative {
 	idxAlt := rank(alt, alts)
 
@@ -10,16 +14,19 @@ func removeAlt(alt Alternative, alts []Alternative) []Alternative {
 	return alts
 }
 
+// removeAltFromProfile removes an alternative of a profile
 func removeAltFromProfile(alt Alternative, p *Profile) {
 	for indiv, prefs := range *p {
 		(*p)[indiv] = removeAlt(alt, prefs)
 	}
 }
 
+// STV_SWF provides the Social Welfare Function of STV method.
 func STV_SWF(p Profile) (Count, error) {
 	return MajoritySWF(p)
 }
 
+// STV_SCF provides the Social Choice Function of STV method.
 func STV_SCF(p Profile) (bestAlts []Alternative, err error) {
 	for n := len(p[0]); n > 0; n-- {
 		count, err := STV_SWF(p)
