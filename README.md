@@ -38,7 +38,7 @@ Avec les flags suivants :
 
 	--host hôte
 		Indique l'hôte sur lequel le serveur tourne.
-		Défaut : localhost
+		Défaut : http://localhost
 	--port portNumber
 		Indique le port sur lequel le serveur écoute.
 		Défaut : 8080
@@ -68,7 +68,7 @@ Avec les flags suivants :
 
 	--host hôte
 		Indique l'hôte sur lequel le serveur tourne.
-		Défaut : localhost
+		Défaut : http://localhost
 	--port portNumber
 		Indique le port sur lequel le serveur écoute.
 		Défaut : 8080
