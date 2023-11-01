@@ -3,11 +3,14 @@ package voteragent
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"gitlab.utc.fr/mennynat/ia04-tp/agt"
 	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	rs "gitlab.utc.fr/mennynat/ia04-tp/restserver"
 	"gitlab.utc.fr/mennynat/ia04-tp/utils/concurrent"
 )
 
@@ -47,7 +50,7 @@ func (agent *RestVoterAgent) Prefers(a comsoc.Alternative, b comsoc.Alternative)
 	HTTP response decoder
 */
 
-func decodeRequest[T any](r *http.Request, req *T) (err error) {
+func decodeRequest[T any](r *http.Response, req *T) (err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
@@ -58,8 +61,42 @@ func decodeRequest[T any](r *http.Request, req *T) (err error) {
 	HTTP requesters
 */
 
-func (voter *RestVoterAgent) doNewBallot(rule string, deadline string, voters []RestVoterAgent, tieBreak []comsoc.Alternative) {
+func DoNewBallot(url string, rule string, deadline string, voters []RestVoterAgent, tieBreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
 
+	if len(voters) == 0 {
+		return res, errors.New("0:Cannot create new ballot without any voters")
+	}
+
+	votersIDs := make([]string, len(voters))
+	for voterIdx, currVoter := range voters {
+		votersIDs[voterIdx] = fmt.Sprint(currVoter.ID)
+	}
+
+	req := rs.NewBallotRequest{
+		Rule:     rule,
+		Deadline: deadline,
+		Voters:   votersIDs,
+		Alts:     int(slices.Max(voters[0].Prefs)),
+		TieBreak: tieBreak,
+	}
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		return
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode != 201 {
+		return res, fmt.Errorf("%d:%s", resp.StatusCode, resp.Status)
+	}
+
+	decodeRequest[rs.NewBallotResponse](resp, &res)
+
+	return
 }
 
 /*
