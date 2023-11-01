@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	ba "gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	ba "gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
 )
 
 type RestServerAgent struct {
@@ -93,10 +94,10 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		log.Println("Ballot newBallotId : " + err.Error())
 		switch strings.Split(err.Error(), "::")[0] {
-		case "400":
+		case "1", "2", "3":
 			w.WriteHeader(BAD_REQUEST)
 			fmt.Fprint(w, "JSON incorrect content")
-		case "501":
+		case "4":
 			w.WriteHeader(NOT_IMPL)
 			fmt.Fprintf(w, "vote method %q not supported", req.Rule)
 		}
