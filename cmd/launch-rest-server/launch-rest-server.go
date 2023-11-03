@@ -1,5 +1,5 @@
 /*
-lunch-rest-server starts the REST server to which the users connect to create Ballots and to vote
+launch-rest-server starts the REST server to which the users connect to create Ballots and to vote
 
 Usage :
 
