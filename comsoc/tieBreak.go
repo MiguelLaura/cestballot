@@ -27,7 +27,7 @@ func TieBreakFactory(allAlts []Alternative) func([]Alternative) (alt Alternative
 
 		for altIdx := 1; altIdx < len(currAlts); altIdx++ {
 			// Chooses the best alternative (i.e. the one with the minimal rank)
-			if isPref(currAlts[altIdx], alt, allAlts) {
+			if IsPref(currAlts[altIdx], alt, allAlts) {
 				alt = currAlts[altIdx]
 			}
 		}

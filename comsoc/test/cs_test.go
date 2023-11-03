@@ -1,19 +1,21 @@
 // version 2.0.0
 
-package comsoc
+package comsoc_test
 
 import (
 	"testing"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 func TestBordaSWF(t *testing.T) {
-	prefs := [][]Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, _ := BordaSWF(prefs)
+	res, _ := comsoc.BordaSWF(prefs)
 
 	if res[1] != 4 {
 		t.Errorf("error, result for 1 should be 4, %d computed", res[1])
@@ -27,13 +29,13 @@ func TestBordaSWF(t *testing.T) {
 }
 
 func TestBordaSCF(t *testing.T) {
-	prefs := [][]Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, err := BordaSCF(prefs)
+	res, err := comsoc.BordaSCF(prefs)
 
 	if err != nil {
 		t.Error(err)
@@ -45,13 +47,13 @@ func TestBordaSCF(t *testing.T) {
 }
 
 func TestMajoritySWF(t *testing.T) {
-	prefs := [][]Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, _ := MajoritySWF(prefs)
+	res, _ := comsoc.MajoritySWF(prefs)
 
 	if res[1] != 2 {
 		t.Errorf("error, result for 1 should be 2, %d computed", res[1])
@@ -65,13 +67,13 @@ func TestMajoritySWF(t *testing.T) {
 }
 
 func TestMajoritySCF(t *testing.T) {
-	prefs := [][]Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, err := MajoritySCF(prefs)
+	res, err := comsoc.MajoritySCF(prefs)
 
 	if err != nil {
 		t.Error(err)
@@ -83,14 +85,14 @@ func TestMajoritySCF(t *testing.T) {
 }
 
 func TestApprovalSWF(t *testing.T) {
-	prefs := [][]Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 3, 2},
 		{2, 3, 1},
 	}
 	thresholds := []int{2, 1, 2}
 
-	res, _ := ApprovalSWF(prefs, thresholds)
+	res, _ := comsoc.ApprovalSWF(prefs, thresholds)
 
 	if res[1] != 2 {
 		t.Errorf("error, result for 1 should be 2, %d computed", res[1])
@@ -104,14 +106,14 @@ func TestApprovalSWF(t *testing.T) {
 }
 
 func TestApprovalSCF(t *testing.T) {
-	prefs := [][]Alternative{
+	prefs := comsoc.Profile{
 		{1, 3, 2},
 		{1, 2, 3},
 		{2, 1, 3},
 	}
 	thresholds := []int{2, 1, 2}
 
-	res, err := ApprovalSCF(prefs, thresholds)
+	res, err := comsoc.ApprovalSCF(prefs, thresholds)
 
 	if err != nil {
 		t.Error(err)
@@ -122,20 +124,20 @@ func TestApprovalSCF(t *testing.T) {
 }
 
 func TestCondorcetWinner(t *testing.T) {
-	prefs1 := [][]Alternative{
+	prefs1 := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	prefs2 := [][]Alternative{
+	prefs2 := comsoc.Profile{
 		{1, 2, 3},
 		{2, 3, 1},
 		{3, 1, 2},
 	}
 
-	res1, _ := CondorcetWinner(prefs1)
-	res2, _ := CondorcetWinner(prefs2)
+	res1, _ := comsoc.CondorcetWinner(prefs1)
+	res2, _ := comsoc.CondorcetWinner(prefs2)
 
 	if len(res1) == 0 || res1[0] != 1 {
 		t.Errorf("error, 1 should be the only best alternative for prefs1")
@@ -147,7 +149,7 @@ func TestCondorcetWinner(t *testing.T) {
 }
 
 func TestSTV_SCF(t *testing.T) {
-	prefs := Profile{
+	prefs := comsoc.Profile{
 		{1, 2, 3, 4},
 		{1, 2, 3, 4},
 		{1, 2, 3, 4},
@@ -164,7 +166,7 @@ func TestSTV_SCF(t *testing.T) {
 		{4, 3, 1, 2},
 	}
 
-	res, _ := STV_SCF(prefs)
+	res, _ := comsoc.STV_SCF(prefs)
 
 	if len(res) != 1 || res[0] != 1 {
 		t.Errorf("error, 1 should be the only best alternative")

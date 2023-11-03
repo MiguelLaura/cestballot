@@ -113,10 +113,10 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		rst.log("doNewBallot : ", strings.Split(err.Error(), "::")[1])
 		switch strings.Split(err.Error(), "::")[0] {
-		case "1", "2", "3", "5":
+		case "1", "2", "3", "4":
 			w.WriteHeader(BAD_REQUEST)
 			fmt.Fprint(w, "JSON incorrect content")
-		case "4":
+		case "5":
 			w.WriteHeader(NOT_IMPL)
 			fmt.Fprintf(w, "vote method %q not supported", req.Rule)
 		}

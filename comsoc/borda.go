@@ -5,7 +5,7 @@ package comsoc
 
 // BordaSWF provides the Social Welfare Function of borda method.
 func BordaSWF(p Profile) (count Count, err error) {
-	if err = checkProfileAlternative(p, p[0]); err != nil {
+	if err = CheckProfileAlternative(p, p[0]); err != nil {
 		return
 	}
 
@@ -32,6 +32,6 @@ func BordaSCF(p Profile) (bestAlts []Alternative, err error) {
 		return nil, err
 	}
 
-	bestAlts = maxCount(count)
+	bestAlts = MaxCount(count)
 	return
 }

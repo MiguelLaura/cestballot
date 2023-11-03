@@ -9,7 +9,7 @@ import (
 )
 
 // rank returns the index in the preferences of the given alternative.
-func rank(alt Alternative, prefs []Alternative) int {
+func Rank(alt Alternative, prefs []Alternative) int {
 	for index, value := range prefs {
 		if value == alt {
 			return index
@@ -20,13 +20,13 @@ func rank(alt Alternative, prefs []Alternative) int {
 }
 
 // isPref indicates is alt1 is preferred to alt2 given a specific preference.
-func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
-	rk1, rk2 := rank(alt1, prefs), rank(alt2, prefs)
+func IsPref(alt1, alt2 Alternative, prefs []Alternative) bool {
+	rk1, rk2 := Rank(alt1, prefs), Rank(alt2, prefs)
 	return rk1 != -1 && rk2 != -1 && rk1 < rk2
 }
 
 // maxCount provides the best alternatives.
-func maxCount(count Count) (bestAlts []Alternative) {
+func MaxCount(count Count) (bestAlts []Alternative) {
 	bestAlts = make([]Alternative, 0)
 	bestCnt := 0
 	for alt, cnt := range count {
@@ -101,7 +101,7 @@ func CheckProfile(prefs []Alternative, alts []Alternative) error {
 }
 
 // checkProfileAlternative checks if every profiles are correct.
-func checkProfileAlternative(prefs Profile, alts []Alternative) error {
+func CheckProfileAlternative(prefs Profile, alts []Alternative) error {
 
 	// Check if there's at least one profile
 	if len(prefs) == 0 {

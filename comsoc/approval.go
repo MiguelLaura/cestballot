@@ -8,7 +8,7 @@ import "errors"
 // ApprovalSWF provides the Social Welfare Function of approval method.
 // The thresholds of each voter are provided to know where they stop voting.
 func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
-	if err = checkProfileAlternative(p, p[0]); err != nil {
+	if err = CheckProfileAlternative(p, p[0]); err != nil {
 		return nil, err
 	}
 
@@ -44,6 +44,6 @@ func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error
 		return nil, err
 	}
 
-	bestAlts = maxCount(count)
+	bestAlts = MaxCount(count)
 	return
 }

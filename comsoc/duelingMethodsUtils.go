@@ -43,7 +43,7 @@ func generateCombinationsRec(alts []Alternative, level int, chnl chan []Alternat
 
 // Makes duel between every combination of alternatives and gives the count of every one of them.
 func duel(p Profile) (resDuel Count, err error) {
-	if err = checkProfileAlternative(p, p[0]); err != nil {
+	if err = CheckProfileAlternative(p, p[0]); err != nil {
 		return
 	}
 
@@ -60,7 +60,7 @@ func duel(p Profile) (resDuel Count, err error) {
 		a, b := combi[0], combi[1]
 
 		for _, pref := range p {
-			if isPref(a, b, pref) {
+			if IsPref(a, b, pref) {
 				scoreA += 1
 			} else {
 				scoreB += 1

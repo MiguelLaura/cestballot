@@ -5,7 +5,7 @@ package comsoc
 
 // removeAlt removes an alternative of a list of alternative
 func removeAlt(alt Alternative, alts []Alternative) []Alternative {
-	idxAlt := rank(alt, alts)
+	idxAlt := Rank(alt, alts)
 
 	if idxAlt != -1 {
 		return append(alts[:idxAlt], alts[idxAlt+1:]...)
