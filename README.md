@@ -91,6 +91,35 @@ Avec les flags suivants :
 		Défaut : scrutin1
 ```
 
+### Programme de test
+
+Lance un serveur REST ainsi que des Bureaux de votes ou un certain nombre d'agent votants
+vont aller voter de manière aléatoire.
+
+```
+	launch-all [flags]
+
+Avec les flags suivants : 
+
+	--host hôte
+		Indique l'hôte sur lequel le serveur tourne.
+		Défaut : localhost
+	--port portNumber
+		Indique le port sur lequel le serveur écoute.
+		Défaut : 8080
+	--nbBallots nbBallots
+		Indique le nombre de bureaux de votes à créer.
+		Défaut : 2
+	--nbVoters nbVoters
+		Indique le nombre d'agents votants.
+		Défaut : 20
+	--nbAlts nbAlts
+		Indique le nombre d'alternatives.
+		Défaut : 15
+	-v
+		Lance le serveur en mode verbeux.
+```
+
 ## Hypothèses d'utilisation
 
 - Un ballot ne peux avoir moins de deux alternatives
