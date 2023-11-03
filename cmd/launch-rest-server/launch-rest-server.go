@@ -3,7 +3,7 @@ lunch-rest-server starts the REST server to which the users connect to create Ba
 
 Usage :
 
-	lunch-rest-server [flags]
+	launch-rest-server [flags]
 
 The flags are:
 

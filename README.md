@@ -13,7 +13,7 @@ Tous les scripts suivants se trouvent dans le répertoire cmd/, il est ainsi pos
 Le serveur REST doit être lancé en premier, c'est sur lui que les requêtes se font et c'est lui qui les dirigent vers les bons bureaux de vote.
 
 ```
-	lunch-rest-server [flags]
+	launch-rest-server [flags]
 
 Avec les flags suivants : 
 
