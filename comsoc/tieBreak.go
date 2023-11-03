@@ -5,6 +5,10 @@ package comsoc
 
 import (
 	"errors"
+	"slices"
+	"sort"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/utils/sequential"
 )
 
 // TieBreakFactory creates a simple tiebreak that returns the first best alternative.
@@ -36,38 +40,63 @@ func TieBreakFactory(allAlts []Alternative) func([]Alternative) (alt Alternative
 func SWFFactory(
 	swf func(Profile) (Count, error),
 	tiebreak func([]Alternative) (Alternative, error),
-) func(Profile) (Count, error) {
+) func(Profile) ([]Alternative, error) {
 
-	return func(p Profile) (Count, error) {
+	return func(p Profile) ([]Alternative, error) {
 
-		countGl, err := swf(p)
+		count, err := swf(p)
 		if err != nil {
 			return nil, err
 		}
 
-		// Maps the count of the elements in countGl to the corresponding alternatives
-		mapExequo := make(map[int][]Alternative)
-		countReduced := make(Count)
+		// Gets all the alternatives and map them to the number of votes tey received
+		exAequo := make(map[int][]Alternative)
 
-		// Gets the exequo alternatives
-		for alt, cnt := range countGl {
-			// If no alternatives has this occurrence
-			if _, ok := mapExequo[cnt]; !ok {
-				mapExequo[cnt] = make([]Alternative, 1)
-				mapExequo[cnt][0] = alt
+		for alt, nbVotes := range count {
+			if _, err := exAequo[nbVotes]; !err {
+				exAequo[nbVotes] = make([]Alternative, 1)
+				exAequo[nbVotes][0] = alt
 			} else {
-				mapExequo[cnt] = append(mapExequo[cnt], alt)
+				exAequo[nbVotes] = append(exAequo[nbVotes], alt)
 			}
 		}
 
-		// Creates a map without the exequo alternatives
-		for cnt, alts := range mapExequo {
-			bestAlt, _ := tiebreak(alts)
-			countReduced[bestAlt] = cnt
+		// Gets the number of vote and orders it in descending order
+		nbVotes := make([]int, 0, len(exAequo))
+		for nbVote := range exAequo {
+			nbVotes = append(nbVotes, nbVote)
+		}
+		sort.Ints(nbVotes)
+		slices.Reverse(nbVotes)
+
+		// Constructs the list without exaequo
+		res := make([]Alternative, len(count))
+		resIdx := 0
+
+		for _, nbVote := range nbVotes {
+
+			altNbVote := exAequo[nbVote]
+			nbAlts := len(altNbVote)
+
+			for altIdx := 0; altIdx < nbAlts; altIdx++ {
+
+				// Gets the best alternative available
+				bestAlt, err := tiebreak(altNbVote)
+				if err != nil {
+					return nil, err
+				}
+
+				res[resIdx] = bestAlt
+
+				// Removes the best alternative from all the previous alternatives
+				idxBestAlt, _ := sequential.Find(altNbVote, func(alt Alternative) bool { return alt == bestAlt })
+				altNbVote = append(altNbVote[:idxBestAlt], altNbVote[idxBestAlt+1:]...)
+
+				resIdx++
+			}
 		}
 
-		return countReduced, err
-
+		return res, nil
 	}
 }
 
