@@ -97,3 +97,4 @@ Avec les flags suivants :
 - Un ballot ne peux avoir moins de deux votants
 - Si deux alternatives ou plus se retrouvent ex æquo c'est celle qui a le plus petit rang dans le tiebreak donné au bureau de vote qui est choisi ;
 - Si un bureau de vote ferme sans avoir reçu de votes c'est le choix préféré du tiebreak qui est choisi.
+- Pour un vote par approbation, si l'agent votant ne donne pas la limte à laquelle il vote, on considère qu'il vote seulement pour son préféré
