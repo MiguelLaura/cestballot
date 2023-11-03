@@ -134,7 +134,7 @@ func DoNewBallot(servUrl string, rule string, deadline string, votersID []string
 		return res, fmt.Errorf("1::%s", err.Error())
 	}
 
-	url := fmt.Sprintf("%s/new-ballot", servUrl)
+	url := fmt.Sprintf("%s/new_ballot", servUrl)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return res, fmt.Errorf("2::%s", err.Error())

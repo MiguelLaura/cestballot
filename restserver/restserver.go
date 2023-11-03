@@ -293,7 +293,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 func (rst *RestServerAgent) Start() {
 	// Create the multiplexer to redirect the requests
 	mux := http.NewServeMux()
-	mux.HandleFunc("/new-ballot", rst.doNewBallot)
+	mux.HandleFunc("/new_ballot", rst.doNewBallot)
 	mux.HandleFunc("/vote", rst.doVote)
 	mux.HandleFunc("/result", rst.doResult)
 
