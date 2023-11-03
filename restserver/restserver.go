@@ -254,7 +254,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	// ---
 	// Handle response
 
-	res, err := ballotAgent.GetVoteResult()
+	winner, ranking, err := ballotAgent.GetVoteResult()
 	if err != nil {
 		switch strings.Split(err.Error(), "::")[0] {
 		case "1":
@@ -270,20 +270,15 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if res == 0 {
-		rst.log("doResult : Result not found... for ballot '" + req.Ballot + "'")
-		w.WriteHeader(NOT_FOUND)
-		fmt.Fprint(w, "Result not found")
-	}
-
 	var resp ResultResponse
-	resp.Winner = res
+	resp.Winner = winner
+	resp.Ranking = ranking
 
 	w.WriteHeader(RESULT_OBTAINED)
 	serial, _ := json.Marshal(resp)
 	w.Write(serial)
 
-	rst.log(fmt.Sprintf("doResult : for ballot %q, the result is %d", req.Ballot, res))
+	rst.log(fmt.Sprintf("doResult : for ballot %q, the result is %d with the following ranking : %v", req.Ballot, winner, ranking))
 }
 
 /*

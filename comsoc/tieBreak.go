@@ -43,8 +43,12 @@ func SWFFactory(
 ) func(Profile) ([]Alternative, error) {
 
 	return func(p Profile) ([]Alternative, error) {
+		if len(p) == 0 {
+			return nil, errors.New("the given profile is empty")
+		}
 
 		count, err := swf(p)
+
 		if err != nil {
 			return nil, err
 		}

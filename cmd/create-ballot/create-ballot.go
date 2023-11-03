@@ -63,7 +63,7 @@ func main() {
 	host := flag.String("host", "http://localhost", "url of the host")
 	port := flag.Int("port", 8080, "port of the host")
 	rule := flag.String("rule", "majority", "the voting rule")
-	deadline := flag.String("deadline", time.Now().Add(time.Minute).Format(time.RFC3339), "the deadline of the voting process")
+	deadline := flag.String("deadline", time.Now().Add(5*time.Second).Format(time.RFC3339), "the deadline of the voting process")
 	voters := flag.String("voters", "ag_id1,ag_id2,ag_id3", "list of all agents")
 	tiebreak := flag.String("tiebreak", "4,2,3,1", "list of the tiebreak")
 

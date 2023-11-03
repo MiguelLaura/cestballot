@@ -103,6 +103,11 @@ func CheckProfile(prefs []Alternative, alts []Alternative) error {
 // checkProfileAlternative checks if every profiles are correct.
 func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 
+	// Check if there's at least one profile
+	if len(prefs) == 0 {
+		return errors.New("there's no preferences")
+	}
+
 	// Checks if there are two times the same alternative in the alts slice
 	if checkDuplicate(alts) {
 		return errors.New("two same alternatives found in the alts slice")

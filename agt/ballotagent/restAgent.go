@@ -29,6 +29,7 @@ type RestBallotAgent struct {
 	ctx        context.Context                 // The context in which the ballot runs
 	tiebreak   []comsoc.Alternative            // The tiebreak used to determine which vote to choose when SCF cannot decide
 	res        comsoc.Alternative              // The result of the vote; available once the deadline is passed
+	ranking    []comsoc.Alternative            // The ranking (aka SWF) associated with the result)
 }
 
 // NewRestBallotAgent creates a new BallotAgent.
@@ -114,6 +115,7 @@ func NewRestBallotAgent(
 		ctx,
 		tieBreaks,
 		0,
+		nil,
 	}, nil
 }
 
@@ -180,25 +182,26 @@ func (agent *RestBallotAgent) Vote(voterId string, prefs []comsoc.Alternative, o
 	return true, nil
 }
 
-// GetVoteResult returns the result of the vote.
+// GetVoteResult returns the result of the vote and the associated ranking.
 // If the vote is not made, the method returns 0.
 //
 // If the result cannot be returned, an error is given in a specific format : errType::errMessage.
 // The errType can be one of the follow :
 // - 1 : If the ballot is not closed
-func (agent *RestBallotAgent) GetVoteResult() (comsoc.Alternative, error) {
+// - 2 : If the vote is not processed
+func (agent *RestBallotAgent) GetVoteResult() (comsoc.Alternative, []comsoc.Alternative, error) {
 	agent.Lock()
 	defer agent.Unlock()
 
 	if !agent.IsClosed() {
-		return 0, fmt.Errorf("1::%q is not closed", agent.String())
+		return 0, nil, fmt.Errorf("1::%q is not closed", agent.String())
 	}
 
 	if !agent.isVoteDone() {
-		return 0, fmt.Errorf("2::vote not processed yet for %q", agent.String())
+		return 0, nil, fmt.Errorf("2::vote not processed yet for %q", agent.String())
 	}
 
-	return agent.res, nil
+	return agent.res, agent.ranking, nil
 }
 
 // isVoteDone indicates if the vote has been processed or not
@@ -222,44 +225,61 @@ func (agent *RestBallotAgent) processVote() (err error) {
 
 	// Gets the SCF corresponding to the ballot voting method
 	var chosenSCF func(comsoc.Profile) ([]comsoc.Alternative, error) = nil
+	var chosenSWF func(comsoc.Profile) (comsoc.Count, error) = nil
 	switch agent.VoteType {
 	case "majority":
 		chosenSCF = comsoc.MajoritySCF
+		chosenSWF = comsoc.MajoritySWF
 	case "borda":
 		chosenSCF = comsoc.BordaSCF
+		chosenSWF = comsoc.BordaSWF
 	case "stv":
 		chosenSCF = comsoc.STV_SCF
+		chosenSWF = comsoc.STV_SWF
 	case "copeland":
 		chosenSCF = comsoc.CopelandSCF
+		chosenSWF = comsoc.CopelandSWF
 	case "approval":
-		chosenSCF = func(p comsoc.Profile) ([]comsoc.Alternative, error) {
-			thresholds := make([]int, len(voteOpts))
-			for idx := range voteOpts {
-				if len(voteOpts[idx]) == 0 {
-					thresholds[idx] = 1
-				} else {
-					thresholds[idx] = voteOpts[idx][0]
-				}
 
+		thresholds := make([]int, len(voteOpts))
+		for idx := range voteOpts {
+			if len(voteOpts[idx]) == 0 {
+				thresholds[idx] = 1
+			} else {
+				thresholds[idx] = voteOpts[idx][0]
 			}
+		}
 
+		chosenSCF = func(p comsoc.Profile) ([]comsoc.Alternative, error) {
 			return comsoc.ApprovalSCF(p, thresholds)
+		}
+
+		chosenSWF = func(p comsoc.Profile) (comsoc.Count, error) {
+			return comsoc.ApprovalSWF(p, thresholds)
 		}
 	}
 
-	if chosenSCF == nil {
+	if chosenSCF == nil || chosenSWF == nil {
 		return fmt.Errorf("vote method %q not supported", agent.VoteType)
 	}
 
-	scf := comsoc.SCFFactory(chosenSCF, comsoc.TieBreakFactory(agent.tiebreak))
+	tiebreak := comsoc.TieBreakFactory(agent.tiebreak)
+	scf := comsoc.SCFFactory(chosenSCF, tiebreak)
+	swf := comsoc.SWFFactory(chosenSWF, tiebreak)
 
-	resVote, err := scf(voteProfile)
+	resSCF, err := scf(voteProfile)
 
 	if err != nil {
 		log.Printf("Error while voting...")
 		return
 	}
-	agent.res = resVote
+	agent.res = resSCF
+
+	resSWF, err := swf(voteProfile)
+
+	if err == nil {
+		agent.ranking = resSWF
+	}
 
 	return nil
 }
