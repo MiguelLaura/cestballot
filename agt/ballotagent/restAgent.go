@@ -63,16 +63,16 @@ func NewRestBallotAgent(
 		return nil, errors.New("2::error " + deadline + " is in the past")
 	}
 
-	// Checks if there's at least two voters
-	if len(voters) < 2 {
-		return nil, errors.New("3::error less than 2 voters")
+	// Checks if there's at least one voters
+	if len(voters) == 0 {
+		return nil, errors.New("3::error no voter given")
 	}
 
+	// Checks the number of alternatives
 	if nbAlts < 2 {
 		return nil, errors.New("4::error less than 2 alternatives")
 	}
 
-	// Checks the number of alternatives
 	if len(tieBreaks) != nbAlts {
 		return nil, errors.New("4::error not the same number of alternatives in nbAlts and tieBreaks")
 	}
