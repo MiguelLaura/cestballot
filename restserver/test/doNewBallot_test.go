@@ -73,7 +73,7 @@ func TestNotEnoughAgent(t *testing.T) {
 		servAddr,
 		"majority",
 		time.Now().Add(5*time.Second).Format(time.RFC3339),
-		[]string{"ag_id1"},
+		[]string{},
 		[]comsoc.Alternative{1, 2, 4, 3},
 	)
 

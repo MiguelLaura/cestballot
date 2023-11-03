@@ -4,7 +4,6 @@ package voteragent
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -114,11 +113,6 @@ func decodeResponse[T any](r *http.Response, req *T) (err error) {
 // - 400 : if the request is incorrect
 // - 501 : if the requested voting rule is not supported
 func DoNewBallot(servUrl string, rule string, deadline string, votersID []string, tiebreak []comsoc.Alternative) (res rs.NewBallotResponse, err error) {
-
-	if len(votersID) == 0 {
-		return res, errors.New("0::Cannot create new ballot without any voters")
-	}
-
 	nbAlts := len(tiebreak)
 
 	req := rs.NewBallotRequest{
