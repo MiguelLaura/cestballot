@@ -40,7 +40,8 @@ type RestBallotAgent struct {
 // - 2 : deadline in the past
 // - 3 : error in the alternatives and tiebreak
 // - 4 : vote type not supported
-func NewRestBallotAgent(id string,
+func NewRestBallotAgent(
+	id string,
 	voteType string,
 	deadline string,
 	voters []string,

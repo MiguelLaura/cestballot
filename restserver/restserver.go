@@ -99,7 +99,7 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	rst.Lock()
 	defer rst.Unlock()
 
-	newBallotId := fmt.Sprintf("vote%d", len(rst.ballots))
+	newBallotId := fmt.Sprintf("scrutin%d", len(rst.ballots)+1)
 
 	theNewBallot, err := ba.NewRestBallotAgent(
 		newBallotId,

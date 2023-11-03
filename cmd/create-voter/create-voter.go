@@ -29,7 +29,7 @@ The flags are:
 		Default :
 	--ballot ballotId
 		Specify the ballot to which the agent votes.
-		Default : vote0
+		Default : scrutin1
 */
 package main
 
@@ -74,7 +74,7 @@ func main() {
 	agentName := flag.String("name", "ag_id1", "name of the agent")
 	preferences := flag.String("prefs", "1,2,4,3", "preferences of the agent")
 	opts := flag.String("opts", "", "opts of the agent for specific vote methods")
-	ballot := flag.String("ballot", "vote0", "the ID of the ballot to which the voter will vote")
+	ballot := flag.String("ballot", "scrutin1", "the ID of the ballot to which the voter will vote")
 
 	flag.Parse()
 
