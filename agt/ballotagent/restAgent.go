@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"slices"
 	"sync"
 	"time"
 
@@ -118,11 +119,7 @@ func NewRestBallotAgent(
 
 // isVoteSupported tell if the given voting method is supported.
 func isVoteSupported(voteType string) bool {
-	voteTypeIdx := 0
-	for voteTypeIdx < len(supportedVotingMethods) && supportedVotingMethods[voteTypeIdx] != voteType {
-		voteTypeIdx++
-	}
-	return voteTypeIdx < len(supportedVotingMethods)
+	return slices.Contains(supportedVotingMethods[:], voteType)
 }
 
 // Strings gives a string representing the Ballot.
