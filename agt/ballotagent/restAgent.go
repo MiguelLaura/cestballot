@@ -26,7 +26,7 @@ type RestBallotAgent struct {
 	Voters     map[string][]comsoc.Alternative // All the voters and their preferences
 	VotersOpts map[string][]int                // The optional voting parameters per agent, depends on the vote type
 	NbAlts     int                             // Number of alternatives available
-	Ctx        context.Context                 // The context in which the ballot runs
+	ctx        context.Context                 // The context in which the ballot runs
 	tiebreak   []comsoc.Alternative            // The tiebreak used to determine which vote to choose when SCF cannot decide
 	res        comsoc.Alternative              // The result of the vote; available once the deadline is passed
 }
@@ -130,10 +130,7 @@ func (agent *RestBallotAgent) String() string {
 // IsClosed indicates if the ballot is closed or not.
 func (agent *RestBallotAgent) IsClosed() bool {
 	select {
-	case <-agent.Ctx.Done():
-		if agent.res == 0 {
-			return false
-		}
+	case <-agent.ctx.Done():
 		return true
 	default:
 		return false
@@ -197,7 +194,16 @@ func (agent *RestBallotAgent) GetVoteResult() (comsoc.Alternative, error) {
 		return 0, fmt.Errorf("1::%q is not closed", agent.String())
 	}
 
+	if !agent.isVoteDone() {
+		return 0, fmt.Errorf("2::vote not processed yet for %q", agent.String())
+	}
+
 	return agent.res, nil
+}
+
+// isVoteDone indicates if the vote has been processed or not
+func (agent *RestBallotAgent) isVoteDone() bool {
+	return agent.res != 0
 }
 
 // processVote computes the vote.
@@ -267,8 +273,8 @@ func (agent *RestBallotAgent) Start() error {
 	}
 
 	go func() {
-		ctx, cancelCtx := context.WithDeadline(agent.Ctx, agent.Deadline)
-		agent.Ctx = ctx
+		ctx, cancelCtx := context.WithDeadline(agent.ctx, agent.Deadline)
+		agent.ctx = ctx
 		defer cancelCtx()
 
 		// Wait until the Deadline is reached

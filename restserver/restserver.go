@@ -260,6 +260,10 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		case "1":
 			w.WriteHeader(TOO_EARLY)
 			fmt.Fprint(w, "It's too early for the result, wait a bit")
+		case "2":
+			w.WriteHeader(NOT_FOUND)
+			fmt.Fprint(w, "Vote not found")
+			fallthrough
 		default:
 			rst.log("doResult : ", strings.Split(err.Error(), "::")[1])
 		}
