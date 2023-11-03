@@ -13,7 +13,7 @@ func createBallot() (restserver.NewBallotResponse, error) {
 	return voteragent.DoNewBallot(
 		servAddr,
 		"majority",
-		time.Now().Add(5*time.Second).Format(time.RFC3339),
+		time.Now().Add(3*time.Second).Format(time.RFC3339),
 		[]string{"ag_id1", "ag_id2", "ag_id3"},
 		[]comsoc.Alternative{1, 2, 4, 3},
 	)
@@ -222,7 +222,7 @@ func TestDeadlineOver(t *testing.T) {
 		servAddr,
 	)
 
-	time.Sleep(6 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	res, _ := agt.DoVote(rep.Id)
 
