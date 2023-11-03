@@ -71,7 +71,7 @@ func NewRestBallotAgent(id string,
 			return nil, errors.New("3::error one value in the tieBreaks is not between 1 and nbAlts")
 		}
 		if valueCheck[tbv-1] > 0 {
-			return nil, errors.New("3::error theres two times the same value in tieBreaks")
+			return nil, errors.New("3::error there's two times the same value in tieBreaks")
 		}
 
 		valueCheck[tbv-1]++
@@ -79,7 +79,7 @@ func NewRestBallotAgent(id string,
 
 	// Checks if the voting method is supported
 	if !isVoteSupported(voteType) {
-		return nil, errors.New("4::" + voteType + " not supported")
+		return nil, errors.New("4::error " + voteType + " not supported")
 	}
 
 	theVoters := make(map[string][]comsoc.Alternative)

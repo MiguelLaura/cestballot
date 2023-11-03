@@ -6,11 +6,11 @@ Application de vote en GO réalisée dans le cadre des cours d'IA04.
 
 ## Utilisation
 
-Tous les scripts suivants se trouvent dans le répertoire cmd/, il est ainsi possible de les compiler avec un `go build` ou `go install`
+Tous les scripts suivants se trouvent dans le répertoire cmd/, il est ainsi possible de les compiler avec un `go build` ou `go install`.
 
 ### Serveur REST
 
-Le serveur REST doit être lancé en premier, c'est sur lui que les requêtes se font et c'est lui qui les dirigent vers les bon bureau de votes.
+Le serveur REST doit être lancé en premier, c'est sur lui que les requêtes se font et c'est lui qui les dirigent vers les bons bureaux de vote.
 
 ```
 	lunch-rest-server [flags]
@@ -29,7 +29,7 @@ Avec les flags suivants :
 
 ### Création de bureaux de vote
 
-Les bureaux de votes supportent les méthodes suivantes : majorité, borda, stv, copeland, approbation
+Les bureaux de vote supportent les méthodes suivantes : majorité, borda, stv, copeland, approbation
 
 ```
 	create-ballot [flags]
