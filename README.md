@@ -88,10 +88,12 @@ Avec les flags suivants :
 		Défaut :
 	--ballot idBureauVote
 		Spécifie le bureau de vote où les agents votent.
-		Défaut : vote0
+		Défaut : scrutin1
 ```
 
 ## Hypothèses d'utilisation
 
+- Un ballot ne peux avoir moins de deux alternatives
+- Un ballot ne peux avoir moins de deux votants
 - Si deux alternatives ou plus se retrouvent ex æquo c'est celle qui a le plus petit rang dans le tiebreak donné au bureau de vote qui est choisi ;
 - Si un bureau de vote ferme sans avoir reçu de votes c'est le choix préféré du tiebreak qui est choisi.
