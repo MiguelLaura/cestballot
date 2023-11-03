@@ -38,8 +38,9 @@ type RestBallotAgent struct {
 // The errType can be one of the follow :
 // - 1 : incorrect date format
 // - 2 : deadline in the past
-// - 3 : error in the alternatives and tiebreak
-// - 4 : vote type not supported
+// - 3 : not the correct number of voter
+// - 4 : error in the alternatives and tiebreak
+// - 5 : vote type not supported
 func NewRestBallotAgent(
 	id string,
 	voteType string,
@@ -60,19 +61,28 @@ func NewRestBallotAgent(
 		return nil, errors.New("2::error " + deadline + " is in the past")
 	}
 
+	// Checks if there's at least two voters
+	if len(voters) < 2 {
+		return nil, errors.New("3::error less than 2 voters")
+	}
+
+	if nbAlts < 2 {
+		return nil, errors.New("4::error less than 2 alternatives")
+	}
+
 	// Checks the number of alternatives
 	if len(tieBreaks) != nbAlts {
-		return nil, errors.New("3::error not the same number of alternatives in nbAlts and tieBreaks")
+		return nil, errors.New("4::error not the same number of alternatives in nbAlts and tieBreaks")
 	}
 
 	// Check if tieBreaks has the right values (no duplicate and values between 1 and nbAlts)
 	valueCheck := make([]comsoc.Alternative, nbAlts)
 	for _, tbv := range tieBreaks {
 		if tbv < 1 || tbv > comsoc.Alternative(nbAlts) {
-			return nil, errors.New("3::error one value in the tieBreaks is not between 1 and nbAlts")
+			return nil, errors.New("4::error one value in the tieBreaks is not between 1 and nbAlts")
 		}
 		if valueCheck[tbv-1] > 0 {
-			return nil, errors.New("3::error there's two times the same value in tieBreaks")
+			return nil, errors.New("4::error there's two times the same value in tieBreaks")
 		}
 
 		valueCheck[tbv-1]++
@@ -80,7 +90,7 @@ func NewRestBallotAgent(
 
 	// Checks if the voting method is supported
 	if !isVoteSupported(voteType) {
-		return nil, errors.New("4::error " + voteType + " not supported")
+		return nil, errors.New("5::error " + voteType + " not supported")
 	}
 
 	theVoters := make(map[string][]comsoc.Alternative)

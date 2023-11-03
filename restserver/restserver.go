@@ -111,9 +111,9 @@ func (rst *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	)
 
 	if err != nil {
-		rst.log("doNewBallot : ", err.Error())
+		rst.log("doNewBallot : ", strings.Split(err.Error(), "::")[1])
 		switch strings.Split(err.Error(), "::")[0] {
-		case "1", "2", "3":
+		case "1", "2", "3", "5":
 			w.WriteHeader(BAD_REQUEST)
 			fmt.Fprint(w, "JSON incorrect content")
 		case "4":
@@ -190,7 +190,7 @@ func (rst *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 
 	_, err = ballotAgent.Vote(req.Agent, req.Prefs, req.Options)
 	if err != nil {
-		rst.log("doVote : ", err.Error())
+		rst.log("doVote : ", strings.Split(err.Error(), "::")[1])
 		switch strings.Split(err.Error(), "::")[0] {
 		case "1":
 			w.WriteHeader(DEADLINE_OVER)
@@ -261,7 +261,7 @@ func (rst *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(TOO_EARLY)
 			fmt.Fprint(w, "It's too early for the result, wait a bit")
 		default:
-			rst.log("doResult : ", err.Error())
+			rst.log("doResult : ", strings.Split(err.Error(), "::")[1])
 		}
 		return
 	}
