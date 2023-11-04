@@ -9,7 +9,7 @@ The flags are:
 
 	--host hostName
 		Specify the url of the host.
-		Default : http://localhost
+		Default : localhost
 	--port portNumber
 		Specify the number of the port to which the server listens.
 		Default : 8080
@@ -60,7 +60,7 @@ func extractAlternativesFromString(altStringList string) []comsoc.Alternative {
 
 func main() {
 
-	host := flag.String("host", "http://localhost", "url of the host")
+	host := flag.String("host", "localhost", "url of the host")
 	port := flag.Int("port", 8080, "port of the host")
 	rule := flag.String("rule", "majority", "the voting rule")
 	deadline := flag.String("deadline", time.Now().Add(5*time.Second).Format(time.RFC3339), "the deadline of the voting process")
@@ -74,7 +74,7 @@ func main() {
 	theTiebreak := extractAlternativesFromString(*tiebreak)
 
 	res, err := voteragent.DoNewBallot(
-		fmt.Sprintf("%s:%d", *host, *port),
+		fmt.Sprintf("http://%s:%d", *host, *port),
 		*rule,
 		*deadline,
 		theVoters,

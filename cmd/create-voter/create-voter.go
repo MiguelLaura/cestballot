@@ -9,7 +9,7 @@ The flags are:
 
 	--host hostName
 		Specify the url of the host.
-		Default : http://localhost
+		Default : localhost
 	--port portNumber
 		Specify the number of the port to which the server listens.
 		Default : 8080
@@ -68,7 +68,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	host := flag.String("host", "http://localhost", "url of the host")
+	host := flag.String("host", "localhost", "url of the host")
 	port := flag.Int("port", 8080, "port of the host")
 	agentId := flag.String("id", "ag_id1", "id of the agent")
 	agentName := flag.String("name", "ag_id1", "name of the agent")
@@ -86,7 +86,7 @@ func main() {
 		*agentName,
 		thePrefs,
 		theOpts,
-		fmt.Sprintf("%s:%d", *host, *port),
+		fmt.Sprintf("http://%s:%d", *host, *port),
 	)
 
 	wg.Add(1)
