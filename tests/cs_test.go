@@ -1,4 +1,4 @@
-package test_comsoc
+package test
 
 import (
 	"ia04-tp/comsoc"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestCheckProfileAlternativeError(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -20,7 +20,7 @@ func TestCheckProfileAlternativeError(t *testing.T) {
 }
 
 func TestCheckProfileAlternativeSizeError(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 1},
@@ -34,7 +34,7 @@ func TestCheckProfileAlternativeSizeError(t *testing.T) {
 }
 
 func TestBordaSWF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -54,7 +54,7 @@ func TestBordaSWF(t *testing.T) {
 }
 
 func TestBordaSCF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -72,7 +72,7 @@ func TestBordaSCF(t *testing.T) {
 }
 
 func TestBordaSCFMultiple(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{3, 2, 1},
 	}
@@ -89,7 +89,7 @@ func TestBordaSCFMultiple(t *testing.T) {
 }
 
 func TestMajoritySWF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -109,7 +109,7 @@ func TestMajoritySWF(t *testing.T) {
 }
 
 func TestMajoritySCF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -127,7 +127,7 @@ func TestMajoritySCF(t *testing.T) {
 }
 
 func TestMajoritySCFMultiple(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{3, 2, 1},
 	}
@@ -144,7 +144,7 @@ func TestMajoritySCFMultiple(t *testing.T) {
 }
 
 func TestApprovalSWF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 3, 2},
 		{2, 3, 1},
@@ -165,7 +165,7 @@ func TestApprovalSWF(t *testing.T) {
 }
 
 func TestApprovalSWFThresholdError(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 3, 2},
 		{2, 3, 1},
@@ -180,7 +180,7 @@ func TestApprovalSWFThresholdError(t *testing.T) {
 }
 
 func TestApprovalSCF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 3, 2},
 		{1, 2, 3},
 		{2, 1, 3},
@@ -198,7 +198,7 @@ func TestApprovalSCF(t *testing.T) {
 }
 
 func TestApprovalSCFMultiple(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 3, 2},
 		{3, 2, 1},
 		{2, 1, 3},
@@ -212,13 +212,13 @@ func TestApprovalSCFMultiple(t *testing.T) {
 }
 
 func TestCondorcetWinner(t *testing.T) {
-	prefs1 := [][]comsoc.Alternative{
+	prefs1 := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	prefs2 := [][]comsoc.Alternative{
+	prefs2 := comsoc.Profile{
 		{1, 2, 3},
 		{2, 3, 1},
 		{3, 1, 2},
@@ -236,7 +236,7 @@ func TestCondorcetWinner(t *testing.T) {
 }
 
 func TestCopelandSWF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -256,7 +256,7 @@ func TestCopelandSWF(t *testing.T) {
 }
 
 func TestCopelandSCF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -274,7 +274,7 @@ func TestCopelandSCF(t *testing.T) {
 }
 
 func TestSTV_SWF(t *testing.T) {
-	prefs := [][]comsoc.Alternative{
+	prefs := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -294,12 +294,12 @@ func TestSTV_SWF(t *testing.T) {
 }
 
 func TestSTV_SCF(t *testing.T) {
-	prefs1 := [][]comsoc.Alternative{
+	prefs1 := comsoc.Profile{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
-	prefs2 := [][]comsoc.Alternative{
+	prefs2 := comsoc.Profile{
 		{1, 2, 3, 4},
 		{1, 2, 3, 4},
 		{1, 2, 3, 4},
@@ -353,19 +353,19 @@ func TestTieBreakFactory(t *testing.T) {
 func TestSWFFactory(t *testing.T) {
 	orderedAlts1 := []comsoc.Alternative{1, 2, 3, 4}
 	orderedAlts2 := []comsoc.Alternative{3, 1, 2, 4}
-	prefs1 := [][]comsoc.Alternative{
+	prefs1 := comsoc.Profile{
 		{1, 3, 2, 4},
 		{1, 2, 3, 4},
 		{2, 1, 3, 4},
 		{2, 1, 3, 4},
 	}
-	prefs2 := [][]comsoc.Alternative{
+	prefs2 := comsoc.Profile{
 		{3, 2, 1, 4},
 		{3, 2, 1, 4},
 		{3, 1, 2, 4},
 		{3, 1, 2, 4},
 	}
-	prefs3 := [][]comsoc.Alternative{
+	prefs3 := comsoc.Profile{
 		{1, 2, 3, 4},
 		{2, 1, 3, 4},
 		{1, 2, 3, 4},
@@ -435,13 +435,13 @@ func TestSWFFactory(t *testing.T) {
 func TestSCFFactory(t *testing.T) {
 	orderedAlts1 := []comsoc.Alternative{1, 2, 3}
 	orderedAlts2 := []comsoc.Alternative{2, 1}
-	prefs1 := [][]comsoc.Alternative{
+	prefs1 := comsoc.Profile{
 		{1, 3, 2},
 		{1, 2, 3},
 		{2, 1, 3},
 		{2, 1, 3},
 	}
-	prefs2 := [][]comsoc.Alternative{
+	prefs2 := comsoc.Profile{
 		{1, 2},
 		{2, 1},
 		{1, 2},

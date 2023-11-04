@@ -23,6 +23,8 @@ type BallotAgent struct {
 	options     []int
 	profile     comsoc.Profile
 	voterIdDone []string
+	winner      comsoc.Alternative
+	ranking     []comsoc.Alternative
 }
 
 type RestServerAgent struct {
@@ -273,7 +275,10 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	// Methode de vote
 	var resp ResponseResult
-	if ballot.profile == nil {
+	if ballot.winner != 0 {
+		resp.Ranking = ballot.ranking
+		resp.Winner = ballot.winner
+	} else if ballot.profile == nil {
 		resp.Ranking = ballot.tieBreak
 		resp.Winner = ballot.tieBreak[0]
 	} else {

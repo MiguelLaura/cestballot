@@ -11,7 +11,7 @@ import (
 )
 
 type RestBallotAgent struct {
-	ballotId string
+	BallotId string
 	url      string
 	rule     string
 	deadline string
@@ -31,7 +31,7 @@ func (*RestBallotAgent) decodeResponseBallot(r *http.Response) (res agt.Response
 	return
 }
 
-func (rba *RestBallotAgent) doNewBallot() (err error) {
+func (rba *RestBallotAgent) DoNewBallot() (err error) {
 	req := agt.RequestBallot{
 		Rule:     rba.rule,
 		Deadline: rba.deadline,
@@ -57,17 +57,17 @@ func (rba *RestBallotAgent) doNewBallot() (err error) {
 	}
 
 	res, _ := rba.decodeResponseBallot(resp)
-	rba.ballotId = string(res.BallotId)
+	rba.BallotId = string(res.BallotId)
 	return
 }
 
 func (rba *RestBallotAgent) Start() {
 	log.Printf("démarrage du ballot")
-	err := rba.doNewBallot()
+	err := rba.DoNewBallot()
 
 	if err != nil {
 		log.Fatal("Ballot ", err.Error())
 	} else {
-		log.Printf("[%s] %s %s %s %d %d\n", rba.ballotId, rba.rule, rba.deadline, rba.voterIds, rba.alts, rba.tieBreak)
+		log.Printf("[%s] %s %s %s %d %d\n", rba.BallotId, rba.rule, rba.deadline, rba.voterIds, rba.alts, rba.tieBreak)
 	}
 }

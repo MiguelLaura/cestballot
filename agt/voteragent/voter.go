@@ -22,7 +22,7 @@ func NewRestVoterAgent(agentId string, url string, ballotId string, prefs []coms
 	return &RestVoterAgent{agentId, url, ballotId, prefs, options}
 }
 
-func (rva *RestVoterAgent) doVote() (err error) {
+func (rva *RestVoterAgent) DoVote() (err error) {
 	req := agt.RequestVoter{
 		AgentId:  rva.agentId,
 		BallotId: rva.ballotId,
@@ -51,7 +51,7 @@ func (rva *RestVoterAgent) doVote() (err error) {
 
 func (rva *RestVoterAgent) Start() {
 	log.Printf("démarrage de %s", rva.agentId)
-	err := rva.doVote()
+	err := rva.DoVote()
 
 	if err != nil {
 		log.Fatal(rva.agentId, " error:", err.Error())
