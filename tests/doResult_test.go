@@ -1,4 +1,4 @@
-package ballotagent
+package test
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ func TestIncorrectBallot(t *testing.T) {
 	ag_b := ballotagent.NewRestBallotAgent(
 		servAddr,
 		"majority",
-		time.Now().Add(5*time.Second).Format(time.RFC3339),
+		time.Now().Add(1*time.Second).Format(time.RFC3339),
 		[]string{"ag_id1", "ag_id2", "ag_id3"},
 		4,
 		[]comsoc.Alternative{1, 2, 4, 3},
@@ -38,24 +38,18 @@ func TestIncorrectBallot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
 	req := agt.RequestResult{
 		BallotId: ag_b.BallotId,
 	}
-
-	// sérialisation de la requête
 	url := servAddr + "/result"
 	data, _ := json.Marshal(req)
-
-	// envoi de la requête
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
-
-	// traitement de la réponse
 	if err != nil {
 		t.Fatal(err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("[%d] %s", resp.StatusCode, resp.Status)
+		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
 	}
 }
 
@@ -63,7 +57,7 @@ func TestTooEarly(t *testing.T) {
 	ag_b := ballotagent.NewRestBallotAgent(
 		servAddr,
 		"majority",
-		time.Now().Add(5*time.Second).Format(time.RFC3339),
+		time.Now().Add(1*time.Second).Format(time.RFC3339),
 		[]string{"ag_id1", "ag_id2", "ag_id3"},
 		4,
 		[]comsoc.Alternative{1, 2, 4, 3},
@@ -88,20 +82,14 @@ func TestTooEarly(t *testing.T) {
 	req := agt.RequestResult{
 		BallotId: ag_b.BallotId,
 	}
-
-	// sérialisation de la requête
 	url := servAddr + "/result"
 	data, _ := json.Marshal(req)
-
-	// envoi de la requête
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
-
-	// traitement de la réponse
 	if err != nil {
 		t.Fatal(err)
 	}
 	if resp.StatusCode != http.StatusTooEarly {
-		t.Fatalf("[%d] %s", resp.StatusCode, resp.Status)
+		t.Fatalf("The error code should be %s but received [%d] %s. Deadline not over", "[425] 425 Too Earky", resp.StatusCode, resp.Status)
 	}
 }
 
@@ -109,7 +97,7 @@ func TestResult(t *testing.T) {
 	ag_b := ballotagent.NewRestBallotAgent(
 		servAddr,
 		"majority",
-		time.Now().Add(5*time.Second).Format(time.RFC3339),
+		time.Now().Add(1*time.Second).Format(time.RFC3339),
 		[]string{"ag_id1", "ag_id2", "ag_id3"},
 		4,
 		[]comsoc.Alternative{1, 2, 4, 3},
@@ -131,24 +119,18 @@ func TestResult(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
 	req := agt.RequestResult{
 		BallotId: ag_b.BallotId,
 	}
-
-	// sérialisation de la requête
 	url := servAddr + "/result"
 	data, _ := json.Marshal(req)
-
-	// envoi de la requête
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
-
-	// traitement de la réponse
 	if err != nil {
 		t.Fatal(err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("[%d] %s", resp.StatusCode, resp.Status)
+		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
 	}
 
 	req_rep := agt.ResponseResult{}
@@ -160,12 +142,12 @@ func TestResult(t *testing.T) {
 	}
 
 	if int(req_rep.Winner) != 2 {
-		t.Fatalf("Incorrect result")
+		t.Fatalf("Incorrect result, winner should be 2 instead of %d", int(req_rep.Winner))
 	}
 	correct := []comsoc.Alternative{2, 1, 4, 3}
 	for idx, val := range req_rep.Ranking {
 		if correct[idx] != val {
-			t.Fatalf("Incorrect result")
+			t.Fatalf("Incorrect result, ranking should be [2, 1, 4, 3] instead of %d", req_rep.Ranking)
 		}
 	}
 }

@@ -20,7 +20,7 @@ type RequestVoter struct {
 	AgentId  string               `json:"agent-id"`
 	BallotId string               `json:"ballot-id"`
 	Prefs    []comsoc.Alternative `json:"prefs"`
-	Options  []int                `json:"options"`
+	Options  []int                `json:"options,omitempty"`
 }
 
 type RequestResult struct {
@@ -29,5 +29,5 @@ type RequestResult struct {
 
 type ResponseResult struct {
 	Winner  comsoc.Alternative   `json:"winner"`
-	Ranking []comsoc.Alternative `json:"ranking"`
+	Ranking []comsoc.Alternative `json:"ranking,omitempty"`
 }

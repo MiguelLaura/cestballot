@@ -92,7 +92,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	// traitement de la requête
 
 	// Méthode de vote
-	if !slices.Contains([]string{"majority", "borda", "approval", "condorcet", "copeland", "STV"}, req.Rule) {
+	if !slices.Contains([]string{"majority", "borda", "approval", "condorcet", "copeland", "stv"}, req.Rule) {
 		w.WriteHeader(http.StatusNotImplemented)
 		msg := fmt.Sprintf("erreur : règle de vote inconnue '%s'", req.Rule)
 		w.Write([]byte(msg))
@@ -146,6 +146,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	ballot.voterIds = req.VoterIds
 	ballot.alts = req.Alts
 	ballot.tieBreak = req.TieBreak
+	ballot.winner = -1
 
 	// Gérer la réponse sans erreur
 	var resp ResponseBallot
@@ -191,6 +192,12 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	// AgentId
 	if req.AgentId == "" {
 		err = errors.New("erreur : il manque l'id de l'agent")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+	if !slices.Contains(ballot.voterIds, req.AgentId) {
+		err = errors.New("erreur : l'agent " + fmt.Sprint(req.AgentId) + " ne peut pas voter dans ce ballot.")
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
@@ -275,33 +282,98 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	// Methode de vote
 	var resp ResponseResult
-	if ballot.winner != 0 {
+	if ballot.winner != -1 {
 		resp.Ranking = ballot.ranking
 		resp.Winner = ballot.winner
 	} else if ballot.profile == nil {
-		resp.Ranking = ballot.tieBreak
-		resp.Winner = ballot.tieBreak[0]
+		if ballot.rule == "condorcet" {
+			resp.Ranking = nil
+			resp.Winner = ballot.tieBreak[0]
+		} else {
+			resp.Ranking = ballot.tieBreak
+			resp.Winner = ballot.tieBreak[0]
+		}
 	} else {
 		tieBreak := comsoc.TieBreakFactory(ballot.tieBreak)
 		switch ballot.rule {
 		case "majority":
-			resp.Ranking, _ = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)(ballot.profile)
-			resp.Winner, _ = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)(ballot.profile)
+			resp.Ranking, err = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+			resp.Winner, err = comsoc.SCFFactory(comsoc.MajoritySCF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
 		case "borda":
-			resp.Ranking, _ = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)(ballot.profile)
-			resp.Winner, _ = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)(ballot.profile)
+			resp.Ranking, err = comsoc.SWFFactory(comsoc.BordaSWF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+			resp.Winner, err = comsoc.SCFFactory(comsoc.BordaSCF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
 		case "approval":
-			resp.Ranking, _ = comsoc.SWFFactoryApproval(comsoc.ApprovalSWF, tieBreak)(ballot.profile, ballot.options)
-			resp.Winner, _ = comsoc.SCFFactoryApproval(comsoc.ApprovalSCF, tieBreak)(ballot.profile, ballot.options)
+			resp.Ranking, err = comsoc.SWFFactoryApproval(comsoc.ApprovalSWF, tieBreak)(ballot.profile, ballot.options)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+			resp.Winner, err = comsoc.SCFFactoryApproval(comsoc.ApprovalSCF, tieBreak)(ballot.profile, ballot.options)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
 		case "condorcet":
-			resp.Ranking = nil
-			resp.Winner, _ = comsoc.SCFFactory(comsoc.CondorcetWinner, tieBreak)(ballot.profile)
+			var res []comsoc.Alternative
+			res, err = comsoc.CondorcetWinner(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+			if len(res) != 0 {
+				resp.Winner = res[0]
+			} else {
+				resp.Winner = 0
+			}
 		case "copeland":
-			resp.Ranking, _ = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)(ballot.profile)
-			resp.Winner, _ = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)(ballot.profile)
-		case "STV":
-			resp.Ranking, _ = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)(ballot.profile)
-			resp.Winner, _ = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)(ballot.profile)
+			resp.Ranking, err = comsoc.SWFFactory(comsoc.CopelandSWF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+			resp.Winner, err = comsoc.SCFFactory(comsoc.CopelandSCF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+		case "stv":
+			resp.Ranking, err = comsoc.SWFFactory(comsoc.STV_SWF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+			resp.Winner, err = comsoc.SCFFactory(comsoc.STV_SCF, tieBreak)(ballot.profile)
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				fmt.Fprint(w, err.Error())
+				return
+			}
 		}
 	}
 	w.WriteHeader(http.StatusOK)

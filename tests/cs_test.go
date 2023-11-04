@@ -213,9 +213,9 @@ func TestApprovalSCFMultiple(t *testing.T) {
 
 func TestCondorcetWinner(t *testing.T) {
 	prefs1 := comsoc.Profile{
-		{1, 2, 3},
-		{1, 2, 3},
 		{3, 2, 1},
+		{1, 2, 3},
+		{1, 2, 3},
 	}
 
 	prefs2 := comsoc.Profile{
