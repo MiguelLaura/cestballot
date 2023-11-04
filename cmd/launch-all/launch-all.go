@@ -1,18 +1,3 @@
-package main
-
-import (
-	"flag"
-	"fmt"
-	"log"
-	"math/rand"
-	"sync"
-	"time"
-
-	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
-	"gitlab.utc.fr/mennynat/ia04-tp/restserver"
-)
-
 /*
 launch-all starts a REST server and creates a given number of ballots where a
 a given number of voters can vote randomly.
@@ -41,6 +26,21 @@ The flags are:
 	-v
 		Starts the server in verbose mode.
 */
+package main
+
+import (
+	"flag"
+	"fmt"
+	"log"
+	"math/rand"
+	"sync"
+	"time"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"gitlab.utc.fr/mennynat/ia04-tp/restserver"
+)
+
 func main() {
 
 	host := flag.String("host", "localhost", "url of the host")
