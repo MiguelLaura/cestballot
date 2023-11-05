@@ -1,6 +1,6 @@
 # Application de vote
 
-Auteur·rices : Nathan Menny, Laura Miguel
+Auteur·rices : Nathan Menny, Laura Miguel   
 Groupe : TD1-I
 
 Application de vote en GO réalisée dans le cadre des cours d'IA04.
@@ -34,6 +34,10 @@ Il y a 4 commandes se trouvent dans `cmd/` :
 * [launch-rba](#launch-rba) : lance un ballot
 * [launch-rva](#launch-rva) : lance un voteur et vote
 * [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voteurs et attend pour le résultat (les ballots ont tous les mêmes candidats, tieBreak et voteurs, mais ont des règles et deadlines différentes ; les voteurs votent dans un seul ballot décidé aléatoirement)
+
+## Installation
+
+Les scripts ci-dessus peuvent être installé à l'aide d'un `go install ./cmd/<nom_launcher>` afin d'en faire des executables utilisables de la même manière que décrit ci-dessous.
 
 ### Détail des commandes
 
