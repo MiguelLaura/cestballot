@@ -6,14 +6,14 @@ Groupe : TD1-I
 Application de vote en GO réalisée dans le cadre des cours d'IA04.
 
 # Hypothèses
-* On a au moins 1 voter
+* On a au moins 1 voteur
 * On a au moins 2 candidats/alternatives
 * Quand il n'y a pas de SWF (Condorcet), on renvoie nil/null
 * Pas d'erreur quand on donne des options alors que la règle n'est pas approval
 * Erreur quand on donne en option autre chose qu'un seul nombre dans une slice et qu'on va utiliser l'option
 * Les ag_id peuvent s'abstenir
 * Quand tous les agt s'abstiennent, on renvoie le résultat à partir de tiebreak
-* Avec Condorcet, on peut ne pas avoir de gagnant (si pas de voter ayant voté, le gagnant est le préféré dans tieBreak)
+* Avec Condorcet, on peut ne pas avoir de gagnant (si pas de voteur ayant voté, le gagnant est le préféré dans tieBreak)
 * Si le gagnant est 0, il n'y a pas de gagnant (par exemple, pour Condorcet)
 * Un gagnant de Condorcet gagne tous ses matchs, il ne peut y avoir d'égalité.
 
