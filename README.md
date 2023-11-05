@@ -41,7 +41,7 @@ Le projet peut être récupéré avec go en utilisant la commande suivante :
 `go get gitlab.utc.fr/mennynat/ia04-tp`   
 Ceci va permettre de récupérer la dernière version du package et de le mettre dans `$GOPATH/pkg/mod/gitlab.utc.fr/mennynat`
 
-Les scripts ci-dessus peuvent être installé à l'aide d'un `go install ./cmd/<nom_launcher>` afin d'en faire des exécutables utilisables de la même manière que décrit ci-dessous. Ces exécutables seront trouvables dans `$GOPATH/bin`.
+Ensuite, une fois le projet récupéré, les scripts ci-dessus peuvent être installé à l'aide d'un `go install gitlab.utc.fr/mennynat/ia04-tp/cmd/<nom_launcher>` afin d'en faire des exécutables utilisables de la même manière que décrit ci-dessous. Ces exécutables seront trouvables dans `$GOPATH/bin`.
 
 ### Détail des commandes
 
@@ -169,9 +169,10 @@ Les flags peuvent être :
 
 ## Tests
 
-Des fichiers tests ont été créés. Pour les lancer :
+Des fichiers tests ont été créés afin de tester les méthodes de vote et les agents. Pour les lancer :
+
+❗❗ Pour les tests avec les agents, il faut lancer au préalable un serveur REST à l'adresse "localhost:8080" à l'aide de [launch-rsa](#launch-rsa) 
 
 ```bash
 go test ./tests/
-go test ./comsoc/
 ```
