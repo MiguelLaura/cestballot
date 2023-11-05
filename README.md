@@ -13,8 +13,8 @@ Application de vote en GO réalisée dans le cadre des cours d'IA04.
 * Erreur quand on donne en option autre chose qu'un seul nombre dans une slice et qu'on va utiliser l'option
 * Les ag_id peuvent s'abstenir
 * Quand tous les agt s'abstiennent, on renvoie le résultat à partir de tiebreak
-* Avec condorcet, on peut ne pas avoir de gagnant (si pas de voter ayant voté, le gagnant est le préféré dans tieBreak)
-* Si le winner est 0, il n'y a pas de gagnant (par exemple, pour Condorcet)
+* Avec Condorcet, on peut ne pas avoir de gagnant (si pas de voter ayant voté, le gagnant est le préféré dans tieBreak)
+* Si le gagnant est 0, il n'y a pas de gagnant (par exemple, pour Condorcet)
 * Un gagnant de Condorcet gagne tous ses matchs, il ne peut y avoir d'égalité.
 
 # Utilisation
@@ -32,8 +32,8 @@ Les méthodes de vote suivantes ont été implémentées :
 Les différents scripts suivants se trouvent dans cmd/ :
 * [launch-rsa](#launch-rsa) : lance le serveur
 * [launch-rba](#launch-rba) : lance un ballot
-* [launch-rva](#launch-rva) : lance un voter et vote
-* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voters et attend pour le résultat (les ballotes ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voter votent dans un seul ballot décidé aléatoirement)
+* [launch-rva](#launch-rva) : lance un voteur et vote
+* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voteurs et attend pour le résultat (les ballots ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voteur votent dans un seul ballot décidé aléatoirement)
 
 ## Détail des commandes
 
@@ -149,7 +149,7 @@ Les flags peuvent être :
 		Défaut : 3
 
 	-v, --n-voters nombreVotants
-		Indique le nombre de voters à créer.
+		Indique le nombre de voteurs à créer.
 		Défaut : 10
 
 	-t, --tiebreak tiebreak

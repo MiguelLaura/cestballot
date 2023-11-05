@@ -20,7 +20,7 @@ Les flags peuvent être :
 		Défaut : 3
 
 	-v, --n-voters nombreVotants
-		Indique le nombre de voters à créer.
+		Indique le nombre de voteurs à créer.
 		Défaut : 10
 
 	-t, --tiebreak tiebreak
