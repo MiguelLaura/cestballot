@@ -1,6 +1,7 @@
 # Application de vote
 
-Auteur·rices : Laura Miguel, Nathan Menny
+Auteur·rices : Laura Miguel, Nathan Menny   
+Groupe : TD1-I
 
 Application de vote en GO réalisée dans le cadre des cours d'IA04.
 
