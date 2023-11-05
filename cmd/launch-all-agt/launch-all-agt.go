@@ -111,6 +111,8 @@ func main() {
 		baAgts = append(baAgts, *agt)
 	}
 
+	time.Sleep(time.Second)
+
 	for _, agt := range baAgts {
 		// attention, obligation de passer par cette lambda pour faire capturer la valeur de l'itération par la goroutine
 		go func(agt ballotagent.RestBallotAgent) {

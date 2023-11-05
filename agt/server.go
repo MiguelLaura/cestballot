@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -93,7 +94,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	// traitement de la requête
 
 	// Méthode de vote
-	if !slices.Contains([]string{"majority", "borda", "approval", "condorcet", "copeland", "stv"}, req.Rule) {
+	if !slices.Contains([]string{"majority", "borda", "approval", "condorcet", "copeland", "stv"}, strings.ToLower(req.Rule)) {
 		w.WriteHeader(http.StatusNotImplemented)
 		msg := fmt.Sprintf("erreur : règle de vote inconnue '%s'", req.Rule)
 		w.Write([]byte(msg))
