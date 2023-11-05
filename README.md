@@ -26,9 +26,9 @@ Les méthodes de vote suivantes ont été implémentées :
 * STV
 * Copeland
 
-## Launch
+## Scripts
 
-Les différents scripts suivants se trouvent dans cmd/ et permettent de lancer les différents agents disponibles :
+Les différents scripts suivants se trouvent dans cmd/ :
 * [launch-rsa](#launch-rsa) : lance le serveur
 * [launch-rba](#launch-rba) : lance un ballot
 * [launch-rva](#launch-rva) : lance un voter
