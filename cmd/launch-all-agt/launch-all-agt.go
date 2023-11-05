@@ -35,14 +35,13 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"gitlab.utc.fr/mennynat/ia04-tp/agt"
 	"gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
 	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
+	"gitlab.utc.fr/mennynat/ia04-tp/cmd"
 	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
@@ -52,7 +51,7 @@ func main() {
 
 	var host string
 	var port, nBallot, nVoter int
-	var tbFlag AltFlag
+	var tbFlag cmd.AltFlag
 
 	flag.StringVar(&host, "host", "localhost", "Hôte du serveur")
 	flag.StringVar(&host, "h", "localhost", "Hôte du serveur (raccourci)")
@@ -146,43 +145,4 @@ func main() {
 	wg.Wait()
 
 	fmt.Scanln()
-}
-
-// -----------------------------
-// 	  Structures utilitaires
-// -----------------------------
-
-// Permet d'acquérir les alternatives en ligne de commande
-
-type AltFlag struct {
-	alternatives []comsoc.Alternative
-}
-
-func (vf *AltFlag) String() string {
-	return fmt.Sprintf("%#v", vf.alternatives)
-}
-
-func (vf *AltFlag) Set(s string) error {
-	altsStr := strings.Split(s, ",")
-	alts := make([]comsoc.Alternative, len(altsStr))
-
-	for altIdx, altStr := range altsStr {
-		altConv, err := strconv.Atoi(altStr)
-
-		if err != nil {
-			log.Fatal("Une des alternative donnée n'est pas un entier")
-		}
-
-		alts[altIdx] = comsoc.Alternative(altConv)
-	}
-
-	vf.alternatives = alts
-	return nil
-}
-
-func (vf *AltFlag) GetAlts() []comsoc.Alternative {
-	if vf.alternatives == nil {
-		return []comsoc.Alternative{4, 2, 3, 5, 9, 8, 7, 1, 6, 11, 12, 10}
-	}
-	return vf.alternatives
 }

@@ -40,12 +40,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strconv"
-	"strings"
 	"time"
 
 	"gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"gitlab.utc.fr/mennynat/ia04-tp/cmd"
 )
 
 func main() {
@@ -54,8 +52,8 @@ func main() {
 
 	var host, rule, deadline string
 	var port int
-	var voters VotersFlag
-	var alts AltFlag
+	var voters cmd.VotersFlag
+	var alts cmd.AltFlag
 
 	flag.StringVar(&host, "host", "localhost", "Hôte du serveur")
 	flag.StringVar(&host, "h", "localhost", "Hôte du serveur (raccourci)")
@@ -92,68 +90,4 @@ func main() {
 	)
 	ag.Start()
 	fmt.Scanln()
-}
-
-// -----------------------------
-// 	  Structures utilitaires
-// -----------------------------
-
-// Permet d'acquérir les votants en ligne de commande
-
-type VotersFlag struct {
-	voters []string
-}
-
-func (vf *VotersFlag) String() string {
-	return strings.Join(vf.voters, ",")
-}
-
-func (vf *VotersFlag) Set(s string) error {
-	if s[len(s)-1] == ',' {
-		log.Fatalf("Format du flag des voters incorrect")
-	}
-	vf.voters = strings.Split(s, ",")
-	return nil
-}
-
-func (vf *VotersFlag) GetVoters() []string {
-	if vf.voters == nil {
-		return []string{"ag_id1"}
-	}
-	return vf.voters
-}
-
-// Permet d'acquérir les alternatives en ligne de commande
-
-type AltFlag struct {
-	alternatives []comsoc.Alternative
-}
-
-func (vf *AltFlag) String() string {
-	return fmt.Sprintf("%#v", vf.alternatives)
-}
-
-func (vf *AltFlag) Set(s string) error {
-	altsStr := strings.Split(s, ",")
-	alts := make([]comsoc.Alternative, len(altsStr))
-
-	for altIdx, altStr := range altsStr {
-		altConv, err := strconv.Atoi(altStr)
-
-		if err != nil {
-			log.Fatal("Une des alternative donnée n'est pas un entier")
-		}
-
-		alts[altIdx] = comsoc.Alternative(altConv)
-	}
-
-	vf.alternatives = alts
-	return nil
-}
-
-func (vf *AltFlag) GetAlts() []comsoc.Alternative {
-	if vf.alternatives == nil {
-		return []comsoc.Alternative{4, 2, 3, 5, 9, 8, 7, 1, 6, 11, 12, 10}
-	}
-	return vf.alternatives
 }
