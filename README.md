@@ -1,3 +1,9 @@
+# Application de vote
+
+Auteur·rices : Laura Miguel, Nathan Menny
+
+Application de vote en GO réalisée dans le cadre des cours d'IA04.
+
 # Implémenté
 * Condorcet, Borda, majority, approval, stv, Copeland
 
@@ -6,9 +12,6 @@
 * launch-rba : lance un ballot
 * launch-rva : lance un voter
 * launch-all-agt : lance le serveur, des ballots et des voters (les ballotes ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voter votent dans un seul ballot décidé aléatoirement)
-
-# A faire
-* Implémenter des tests sur le serveur
 
 # Hypothèses
 * On a au moins 1 voter
