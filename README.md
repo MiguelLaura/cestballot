@@ -1,17 +1,18 @@
 # Application de vote
 
-Auteur·rices : Laura Miguel, Nathan Menny   
+Auteur·rices : Nathan Menny, Laura Miguel
 Groupe : TD1-I
 
 Application de vote en GO réalisée dans le cadre des cours d'IA04.
 
 # Hypothèses
+
 * On a au moins 2 candidats/alternatives
 * On a au moins 1 voteur déclaré auprès du ballot
 * Les voteurs peuvent s'abstenir
 * Quand tous les agents s'abstiennent, le résultat est déterminé entièrement par le tieBreak
 * Il n'y a pas d'erreur quand on donne des options alors que la règle n'est pas `approval`
-* Il y a une erreur quand on utilise la méthode `approval` et qu'on donne en option autre chose qu'un seul nombre dans une slice
+* Il y a une erreur quand on utilise la méthode `approval` et qu'on donne en option autre chose qu'un seul nombre dans un slice
 * Quand il n'y a pas de SWF (`condorcet`), on ne renvoie rien pour l'attribut ranking du résultat
 * Avec `condorcet`, on peut ne pas avoir de gagnant, dans ce cas l'attribut gagnant du résultat est à 0 (si aucun voteur inscrit auprès du ballot n'a voté, le gagnant est le préféré dans tieBreak)
 * Un gagnant de `condorcet` gagne tous ses matchs, il ne peut y avoir d'égalité
@@ -32,7 +33,7 @@ Il y a 4 commandes se trouvent dans `cmd/` :
 * [launch-rsa](#launch-rsa) : lance le serveur
 * [launch-rba](#launch-rba) : lance un ballot
 * [launch-rva](#launch-rva) : lance un voteur et vote
-* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voteurs et attend pour le résultat (les ballots ont tous les mêmes candidats, tieBreak et voteurs mais ont des règles et deadlines différentes ; les voteurs votent dans un seul ballot décidé aléatoirement)
+* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voteurs et attend pour le résultat (les ballots ont tous les mêmes candidats, tieBreak et voteurs, mais ont des règles et deadlines différentes ; les voteurs votent dans un seul ballot décidé aléatoirement)
 
 ### Détail des commandes
 
