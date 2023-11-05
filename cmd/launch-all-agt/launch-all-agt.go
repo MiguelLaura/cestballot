@@ -93,6 +93,10 @@ func main() {
 
 	baAgts := make([]ballotagent.RestBallotAgent, 0, nBallot)
 	voAgts := make([]voteragent.RestVoterAgent, 0, nVoter)
+	voterIds := make([]string, nVoter)
+	for j := 0; j < nVoter; j++ {
+		voterIds[j] = "ag_id" + fmt.Sprint(j+1)
+	}
 	servAgt := agt.NewRestServerAgent(url1)
 
 	log.Println("démarrage du serveur...")
@@ -103,10 +107,6 @@ func main() {
 		wg.Add(1)
 		rule := rules[rand.Intn(len(rules))]
 		deadline := time.Now().Add(time.Duration(15 * time.Second)).Format(time.RFC3339)
-		voterIds := make([]string, nVoter)
-		for j := 0; j < nVoter; j++ {
-			voterIds[j] = "ag_id" + fmt.Sprint(j+1)
-		}
 		agt := ballotagent.NewRestBallotAgent(url2, rule, deadline, voterIds, alts, tieBreak)
 		baAgts = append(baAgts, *agt)
 	}
