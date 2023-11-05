@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"ia04-tp/agt"
-	"ia04-tp/agt/ballotagent"
-	"ia04-tp/agt/voteragent"
-	"ia04-tp/comsoc"
 	"net/http"
 	"sync"
 	"testing"
 	"time"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/agt"
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 func TestMajority(t *testing.T) {

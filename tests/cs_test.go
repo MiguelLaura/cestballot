@@ -1,8 +1,9 @@
 package test
 
 import (
-	"ia04-tp/comsoc"
 	"testing"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 func TestCheckProfileAlternativeError(t *testing.T) {

@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"ia04-tp/agt"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/agt"
 )
 
 func main() {

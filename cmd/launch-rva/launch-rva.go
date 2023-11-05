@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"ia04-tp/agt/voteragent"
-	"ia04-tp/comsoc"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 func main() {

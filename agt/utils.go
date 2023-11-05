@@ -3,7 +3,8 @@ package agt
 import (
 	"errors"
 	"fmt"
-	"ia04-tp/comsoc"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 func checkTieBreak(alts int, tieBreak []comsoc.Alternative) error {

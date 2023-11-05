@@ -1,10 +1,11 @@
 package test
 
 import (
-	"ia04-tp/agt/ballotagent"
-	"ia04-tp/comsoc"
 	"testing"
 	"time"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 const servAddr string = "http://localhost:8080"

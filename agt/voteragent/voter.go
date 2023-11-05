@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"ia04-tp/agt"
-	"ia04-tp/comsoc"
 	"log"
 	"net/http"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/agt"
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 type RestVoterAgent struct {

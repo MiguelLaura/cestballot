@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"ia04-tp/comsoc"
 	"log"
 	"net/http"
 	"slices"
 	"sync"
 	"time"
+
+	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 )
 
 type BallotAgent struct {

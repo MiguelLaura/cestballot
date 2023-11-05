@@ -1,6 +1,6 @@
 package agt
 
-import "ia04-tp/comsoc"
+import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"
 
 type RequestBallot struct {
 	Rule     string               `json:"rule"`
