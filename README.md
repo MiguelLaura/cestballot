@@ -33,7 +33,7 @@ Les différents scripts suivants se trouvent dans cmd/ :
 * [launch-rsa](#launch-rsa) : lance le serveur
 * [launch-rba](#launch-rba) : lance un ballot
 * [launch-rva](#launch-rva) : lance un voteur et vote
-* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voteurs et attend pour le résultat (les ballots ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voteur votent dans un seul ballot décidé aléatoirement)
+* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voteurs et attend pour le résultat (les ballots ont tous les mêmes candidats, tieBreak et voteurs mais ont des règles et deadlines différentes; les voteurs votent dans un seul ballot décidé aléatoirement)
 
 ## Détail des commandes
 
