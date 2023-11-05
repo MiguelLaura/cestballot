@@ -39,8 +39,8 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"ia04-tp/agt/voteragent"
+	"ia04-tp/comsoc"
 )
 
 func extractAlternativesFromString(altStringList string) []comsoc.Alternative {

@@ -1,7 +1,7 @@
 // Package voteragent contains an agent that can vote.
 package voteragent
 
-import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+import "ia04-tp/comsoc"
 
 // rank sends the index of the given alternative in the preferences.
 func rank(alt comsoc.Alternative, prefs []comsoc.Alternative) int {

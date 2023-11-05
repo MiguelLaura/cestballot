@@ -22,7 +22,7 @@ import (
 	"flag"
 	"fmt"
 
-	rst "gitlab.utc.fr/mennynat/ia04-tp/restserver"
+	rst "ia04-tp/restserver"
 )
 
 func main() {

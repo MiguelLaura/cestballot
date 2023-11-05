@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	ba "gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
+	ba "ia04-tp/agt/ballotagent"
 )
 
 // RestServerAgent the agent representing the REST server

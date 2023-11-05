@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"time"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/agt"
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
-	rs "gitlab.utc.fr/mennynat/ia04-tp/restserver"
-	"gitlab.utc.fr/mennynat/ia04-tp/utils/concurrent"
+	"ia04-tp/agt"
+	"ia04-tp/comsoc"
+	rs "ia04-tp/restserver"
+	"ia04-tp/utils/concurrent"
 )
 
 // The voting agent structure.

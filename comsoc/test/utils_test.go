@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"ia04-tp/comsoc"
 )
 
 func TestRank(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"slices"
 	"sort"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/utils/sequential"
+	"ia04-tp/utils/sequential"
 )
 
 // TieBreakFactory creates a simple tiebreak that returns the first best alternative.

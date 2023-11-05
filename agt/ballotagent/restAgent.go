@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"ia04-tp/comsoc"
 )
 
 // The voting methods supported by the ballot.

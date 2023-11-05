@@ -5,7 +5,7 @@ package comsoc_test
 import (
 	"testing"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+	"ia04-tp/comsoc"
 )
 
 func TestBordaSWF(t *testing.T) {

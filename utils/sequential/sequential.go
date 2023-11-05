@@ -1,6 +1,6 @@
 package sequential
 
-import "gitlab.utc.fr/mennynat/ia04-tp/utils"
+import "ia04-tp/utils"
 
 // ---------------------------
 //           FILL

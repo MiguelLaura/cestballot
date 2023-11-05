@@ -1,7 +1,7 @@
 // Package restserver handling the REST server allowing to vote
 package restserver
 
-import "gitlab.utc.fr/mennynat/ia04-tp/comsoc"
+import "ia04-tp/comsoc"
 
 /*
 	General status code
