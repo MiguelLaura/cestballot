@@ -1,15 +1,11 @@
 package test
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"sync"
 	"testing"
 	"time"
 
-	"gitlab.utc.fr/mennynat/ia04-tp/agt"
 	"gitlab.utc.fr/mennynat/ia04-tp/agt/ballotagent"
 	"gitlab.utc.fr/mennynat/ia04-tp/agt/voteragent"
 	"gitlab.utc.fr/mennynat/ia04-tp/comsoc"
@@ -65,35 +61,18 @@ func TestMajority(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if int(req_rep.Winner) != 4 {
-		t.Fatalf("Incorrect result, winner should be 4 instead of %d", int(req_rep.Winner))
+	if int(res.Winner) != 4 {
+		t.Fatalf("Incorrect result, winner should be 4 instead of %d", int(res.Winner))
 	}
 	correct := []comsoc.Alternative{4, 2, 1, 3}
-	for idx, val := range req_rep.Ranking {
+	for idx, val := range res.Ranking {
 		if correct[idx] != val {
-			t.Fatalf("Incorrect result, ranking should be [4, 2, 1, 3] instead of %d", req_rep.Ranking)
+			t.Fatalf("Incorrect result, ranking should be [4, 2, 1, 3] instead of %d", res.Ranking)
 		}
 	}
 }
@@ -148,35 +127,18 @@ func TestBorda(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if int(req_rep.Winner) != 1 {
-		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(req_rep.Winner))
+	if int(res.Winner) != 1 {
+		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(res.Winner))
 	}
 	correct := []comsoc.Alternative{1, 2, 3}
-	for idx, val := range req_rep.Ranking {
+	for idx, val := range res.Ranking {
 		if correct[idx] != val {
-			t.Fatalf("Incorrect result, ranking should be [1, 2, 3] instead of %d", req_rep.Ranking)
+			t.Fatalf("Incorrect result, ranking should be [1, 2, 3] instead of %d", res.Ranking)
 		}
 	}
 }
@@ -231,35 +193,18 @@ func TestApproval(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if int(req_rep.Winner) != 1 {
-		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(req_rep.Winner))
+	if int(res.Winner) != 1 {
+		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(res.Winner))
 	}
 	correct := []comsoc.Alternative{1, 2, 3}
-	for idx, val := range req_rep.Ranking {
+	for idx, val := range res.Ranking {
 		if correct[idx] != val {
-			t.Fatalf("Incorrect result, ranking should be [1, 2, 3] instead of %d", req_rep.Ranking)
+			t.Fatalf("Incorrect result, ranking should be [1, 2, 3] instead of %d", res.Ranking)
 		}
 	}
 }
@@ -318,35 +263,18 @@ func TestSTV(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if int(req_rep.Winner) != 1 {
-		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(req_rep.Winner))
+	if int(res.Winner) != 1 {
+		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(res.Winner))
 	}
 	correct := []comsoc.Alternative{1, 2, 4, 3}
-	for idx, val := range req_rep.Ranking {
+	for idx, val := range res.Ranking {
 		if correct[idx] != val {
-			t.Fatalf("Incorrect result, ranking should be [1, 2, 4, 3] instead of %d", req_rep.Ranking)
+			t.Fatalf("Incorrect result, ranking should be [1, 2, 4, 3] instead of %d", res.Ranking)
 		}
 	}
 }
@@ -401,33 +329,16 @@ func TestCondorcet(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
+	if res.Ranking != nil {
+		t.Fatalf("No ranking with Condorcet instead of %d", res.Ranking)
 	}
-
-	if req_rep.Ranking != nil {
-		t.Fatalf("No ranking with Condorcet instead of %d", req_rep.Ranking)
-	}
-	if int(req_rep.Winner) != 1 {
-		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(req_rep.Winner))
+	if int(res.Winner) != 1 {
+		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(res.Winner))
 	}
 }
 
@@ -481,33 +392,16 @@ func TestCondorcetNoWinner(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
+	if int(res.Winner) != 0 {
+		t.Fatalf("Incorrect result, winner should be 0 instead of %d", int(res.Winner))
 	}
-
-	if int(req_rep.Winner) != 0 {
-		t.Fatalf("Incorrect result, winner should be 0 instead of %d", int(req_rep.Winner))
-	}
-	if req_rep.Ranking != nil {
-		t.Fatalf("No ranking with Condorcet instead of %d", req_rep.Ranking)
+	if res.Ranking != nil {
+		t.Fatalf("No ranking with Condorcet instead of %d", res.Ranking)
 	}
 }
 
@@ -561,35 +455,18 @@ func TestCopeland(t *testing.T) {
 	wg.Wait()
 
 	time.Sleep(1 * time.Second)
-
-	req := agt.RequestResult{
-		BallotId: ag_b.BallotId,
-	}
-	url := servAddr + "/result"
-	data, _ := json.Marshal(req)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	res, err := ag_b.DoResult()
 	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("The error code should be %s but received [%d] %s", "[200] 200 OK", resp.StatusCode, resp.Status)
+		t.Fatalf("The request should work")
 	}
 
-	req_rep := agt.ResponseResult{}
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	err = json.Unmarshal(buf.Bytes(), &req_rep)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if int(req_rep.Winner) != 1 {
-		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(req_rep.Winner))
+	if int(res.Winner) != 1 {
+		t.Fatalf("Incorrect result, winner should be 1 instead of %d", int(res.Winner))
 	}
 	correct := []comsoc.Alternative{1, 2, 3}
-	for idx, val := range req_rep.Ranking {
+	for idx, val := range res.Ranking {
 		if correct[idx] != val {
-			t.Fatalf("Incorrect result, ranking should be [1, 2, 3] instead of %d", req_rep.Ranking)
+			t.Fatalf("Incorrect result, ranking should be [1, 2, 3] instead of %d", res.Ranking)
 		}
 	}
 }

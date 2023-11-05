@@ -33,6 +33,21 @@ func TestCorrectVotingMethod(t *testing.T) {
 	}
 }
 
+func TestCorrectVotingMethodCapitalLetters(t *testing.T) {
+	ag := ballotagent.NewRestBallotAgent(
+		servAddr,
+		"MAJORITY",
+		time.Now().Add(1*time.Second).Format(time.RFC3339),
+		[]string{"ag_id1", "ag_id2", "ag_id3"},
+		4,
+		[]comsoc.Alternative{1, 2, 4, 3},
+	)
+	err := ag.DoNewBallot()
+	if err != nil {
+		t.Fatalf("The request should work")
+	}
+}
+
 func TestIncorrectVotingMethod(t *testing.T) {
 	ag := ballotagent.NewRestBallotAgent(
 		servAddr,
