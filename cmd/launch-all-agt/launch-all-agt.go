@@ -10,20 +10,24 @@ Les flags peuvent être :
 	-h, --host nomHôte
 		Indique le nom de l'hôte.
 		Défaut : localhost
+
 	-p, --port numeroPort
 		Indique le port du serveur.
 		Défaut : 8080
+
 	-b, --n-ballots nombreBallot
 		Indique le nombre de bureaux de vote à créer.
 		Défaut : 3
+
 	-v, --n-voters nombreVotants
 		Indique le nombre de voters à créer.
 		Défaut : 10
+
 	-t, --tiebreak tiebreak
 		Indique le tiebreak à utiliser lors des votes.
+		Format : alt1,alt2,alt3
 		Défaut : 4,2,3,5,9,8,7,1,6,11,12,10
 */
-
 package main
 
 import (
