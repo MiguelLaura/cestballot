@@ -127,8 +127,8 @@ func main() {
 	copy(prefs, tieBreak)
 	for i := 0; i < nVoter; i++ {
 		wg.Add(1)
-		agentId := fmt.Sprintf("id%02d", i+1)
-		ballotId := "scrutin0" + fmt.Sprint(rand.Intn(nBallot)+1)
+		agentId := fmt.Sprintf("ag_id%d", i+1)
+		ballotId := fmt.Sprintf("scrutin%02d", rand.Intn(nBallot)+1)
 		rand.Shuffle(len(prefs), func(i, j int) { prefs[i], prefs[j] = prefs[j], prefs[i] })
 		prefsAgt := make([]comsoc.Alternative, len(prefs))
 		copy(prefsAgt, prefs)
