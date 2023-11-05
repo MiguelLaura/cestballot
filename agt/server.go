@@ -297,7 +297,7 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		tieBreak := comsoc.TieBreakFactory(ballot.tieBreak)
-		switch ballot.rule {
+		switch strings.ToLower(ballot.rule) {
 		case "majority":
 			resp.Ranking, err = comsoc.SWFFactory(comsoc.MajoritySWF, tieBreak)(ballot.profile)
 			if err != nil {
