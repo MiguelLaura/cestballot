@@ -111,14 +111,17 @@ func main() {
 		baAgts = append(baAgts, *agt)
 	}
 
+	// Attend un peu pour laisser le temps au serveur REST de se lancer
 	time.Sleep(time.Second)
 
-	for _, agt := range baAgts {
+	// Parcours les ballots via l'indice car DoNewBallot (qui est appelé dans Start) modifie l'état du ballot et que l'on
+	//  souhaite conserver cette modification
+	for ballotIdx := 0; ballotIdx < nBallot; ballotIdx++ {
 		// attention, obligation de passer par cette lambda pour faire capturer la valeur de l'itération par la goroutine
-		go func(agt ballotagent.RestBallotAgent) {
-			agt.Start()
+		go func(ballot *ballotagent.RestBallotAgent) {
+			ballot.Start()
 			defer wg.Done()
-		}(agt)
+		}(&baAgts[ballotIdx])
 	}
 	wg.Wait()
 
@@ -144,6 +147,29 @@ func main() {
 			defer wg.Done()
 		}(agt)
 	}
+
+	wg.Wait()
+
+	log.Println("Attend les resultats...")
+	for _, ballot := range baAgts {
+		wg.Add(1)
+		go func(ballot ballotagent.RestBallotAgent) {
+			tnow := time.Now()
+			res, err := ballot.DoResult()
+			for err != nil && tnow.Add(15*time.Second).After(time.Now()) {
+				time.Sleep(time.Second)
+				res, err = ballot.DoResult()
+			}
+			if err == nil {
+				log.Printf("Ballot [%s] -> Resultat : %d | Ranking : %v\n", ballot.BallotId, res.Winner, res.Ranking)
+			} else {
+				log.Printf("Ballot [%s] (timeout) err %s\n", ballot.BallotId, err.Error())
+			}
+
+			wg.Done()
+		}(ballot)
+	}
+
 	wg.Wait()
 
 	fmt.Scanln()

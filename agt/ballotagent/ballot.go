@@ -32,6 +32,13 @@ func (*RestBallotAgent) decodeResponseBallot(r *http.Response) (res agt.Response
 	return
 }
 
+func (*RestBallotAgent) decodeResponseResult(r *http.Response) (res agt.ResponseResult, err error) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+	err = json.Unmarshal(buf.Bytes(), &res)
+	return
+}
+
 func (rba *RestBallotAgent) DoNewBallot() (err error) {
 	req := agt.RequestBallot{
 		Rule:     rba.rule,
@@ -62,12 +69,37 @@ func (rba *RestBallotAgent) DoNewBallot() (err error) {
 	return
 }
 
+func (rba *RestBallotAgent) DoResult() (res agt.ResponseResult, err error) {
+	req := agt.RequestResult{
+		BallotId: rba.BallotId,
+	}
+
+	// sérialisation de la requête
+	url := rba.url + "/result"
+	data, _ := json.Marshal(req)
+
+	// envoi de la requête
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+
+	// traitement de la réponse
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
+		return
+	}
+
+	res, _ = rba.decodeResponseResult(resp)
+	return
+}
+
 func (rba *RestBallotAgent) Start() {
 	log.Printf("démarrage du ballot")
 	err := rba.DoNewBallot()
 
 	if err != nil {
-		log.Fatal("Ballot ", err.Error())
+		log.Fatal("doNewBallot ", err.Error())
 	} else {
 		log.Printf("[%s] %s %s %s %d %d\n", rba.BallotId, rba.rule, rba.deadline, rba.voterIds, rba.alts, rba.tieBreak)
 	}
