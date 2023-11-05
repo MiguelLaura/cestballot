@@ -1,9 +1,38 @@
+/*
+Crée un serveur REST et tout un ensemble de bureau de votes et d'agents qui vont voter dessus.
+
+Utilisation :
+
+	launch-all-agt [flags]
+
+Les flags peuvent être :
+
+	-h, --host nomHôte
+		Indique le nom de l'hôte.
+		Défaut : localhost
+	-p, --port numeroPort
+		Indique le port du serveur.
+		Défaut : 8080
+	-b, --n-ballots nombreBallot
+		Indique le nombre de bureaux de vote à créer.
+		Défaut : 3
+	-v, --n-voters nombreVotants
+		Indique le nombre de voters à créer.
+		Défaut : 10
+	-t, --tiebreak tiebreak
+		Indique le tiebreak à utiliser lors des votes.
+		Défaut : 4,2,3,5,9,8,7,1,6,11,12,10
+*/
+
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"math/rand"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,13 +43,49 @@ import (
 )
 
 func main() {
+
+	// Traitement des flags
+
+	var host string
+	var port, nBallot, nVoter int
+	var tbFlag AltFlag
+
+	flag.StringVar(&host, "host", "localhost", "Hôte du serveur")
+	flag.StringVar(&host, "h", "localhost", "Hôte du serveur (raccourci)")
+
+	flag.IntVar(&port, "port", 8080, "Port du serveur")
+	flag.IntVar(&port, "p", 8080, "Port du serveur (raccourci)")
+
+	flag.IntVar(&nBallot, "n-ballots", 3, "Nombre de bureaux de votes à créer")
+	flag.IntVar(&nBallot, "b", 3, "Nombre de bureaux de votes à créer (raccourci)")
+
+	flag.IntVar(&nVoter, "n-voters", 10, "Nombre d'agent votants à créer")
+	flag.IntVar(&nVoter, "v", 10, "Nombre d'agent votants à créer (raccourci)")
+
+	flag.Var(&tbFlag, "tiebreak", "Tiebreak utilisée dans les votes")
+	flag.Var(&tbFlag, "t", "Tiebreak utilisée dans les votes")
+
+	flag.Parse()
+
+	if port < 0 {
+		log.Fatalf("Le numéro de port ne peut être négatif (donné %d)", port)
+	}
+
+	if nVoter < 1 {
+		log.Fatalf("Ne peut pas avoir moins de 1 voter (donné %d)", nVoter)
+	}
+
+	if nBallot < 1 {
+		log.Fatalf("Ne peut pas avoir moins de 1 bureau de vote (donné %d)", nBallot)
+	}
+
+	// Execution du script
+
 	var wg sync.WaitGroup
-	const nBallot = 3
-	const nVoter = 10
-	const url1 = ":8080"
-	const url2 = "http://localhost:8080"
+	var url1 = fmt.Sprintf("%s:%d", host, port)
+	var url2 = fmt.Sprintf("http://%s:%d", host, port)
 	rules := [...]string{"majority", "borda", "approval", "condorcet", "copeland", "STV"}
-	tieBreak := []comsoc.Alternative{4, 2, 3, 5, 9, 8, 7, 1, 6, 11, 12, 10}
+	tieBreak := tbFlag.GetAlts()
 	alts := len(tieBreak)
 
 	baAgts := make([]ballotagent.RestBallotAgent, 0, nBallot)
@@ -35,11 +100,11 @@ func main() {
 		wg.Add(1)
 		rule := rules[rand.Intn(len(rules))]
 		deadline := time.Now().Add(time.Duration(15 * time.Second)).Format(time.RFC3339)
-		var voterIds [nVoter]string
+		voterIds := make([]string, nVoter)
 		for j := 0; j < nVoter; j++ {
 			voterIds[j] = "ag_id" + fmt.Sprint(j+1)
 		}
-		agt := ballotagent.NewRestBallotAgent(url2, rule, deadline, voterIds[:], alts, tieBreak)
+		agt := ballotagent.NewRestBallotAgent(url2, rule, deadline, voterIds, alts, tieBreak)
 		baAgts = append(baAgts, *agt)
 	}
 
@@ -77,4 +142,43 @@ func main() {
 	wg.Wait()
 
 	fmt.Scanln()
+}
+
+// -----------------------------
+// 	  Structures utilitaires
+// -----------------------------
+
+// Permet d'acquérir les alternatives en ligne de commande
+
+type AltFlag struct {
+	alternatives []comsoc.Alternative
+}
+
+func (vf *AltFlag) String() string {
+	return fmt.Sprintf("%#v", vf.alternatives)
+}
+
+func (vf *AltFlag) Set(s string) error {
+	altsStr := strings.Split(s, ",")
+	alts := make([]comsoc.Alternative, len(altsStr))
+
+	for altIdx, altStr := range altsStr {
+		altConv, err := strconv.Atoi(altStr)
+
+		if err != nil {
+			log.Fatal("Une des alternative donnée n'est pas un entier")
+		}
+
+		alts[altIdx] = comsoc.Alternative(altConv)
+	}
+
+	vf.alternatives = alts
+	return nil
+}
+
+func (vf *AltFlag) GetAlts() []comsoc.Alternative {
+	if vf.alternatives == nil {
+		return []comsoc.Alternative{4, 2, 3, 5, 9, 8, 7, 1, 6, 11, 12, 10}
+	}
+	return vf.alternatives
 }
