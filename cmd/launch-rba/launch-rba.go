@@ -20,11 +20,11 @@ Les flags peuvent être :
 		Défaut : majority
 
 	-d, --deadline deadline
-		Donne la deadline après laquelle le bureau de vote ferme
+		Donne la deadline après laquelle le bureau de vote ferme.
 		Format : RFC3339
 		Défaut : temps actuel + 5 secondes
 
-	-a, --agents liste des agents voters
+	-a, --agents listeAgents
 		Donne la liste des agents autorisés à voter.
 		Format : id1,id2,id3
 		Défaut : ag_id1
@@ -70,7 +70,7 @@ func main() {
 	flag.Var(&voters, "a", "Liste des agents autorisés à voter (raccourci)")
 
 	flag.Var(&alts, "tiebreak", "Tiebreak utilisée dans le vote")
-	flag.Var(&alts, "t", "Tiebreak utilisée dans le vote")
+	flag.Var(&alts, "t", "Tiebreak utilisée dans le vote (raccourci)")
 
 	flag.Parse()
 

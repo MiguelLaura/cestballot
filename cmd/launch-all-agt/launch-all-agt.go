@@ -66,7 +66,7 @@ func main() {
 	flag.IntVar(&nVoter, "v", 10, "Nombre d'agent votants à créer (raccourci)")
 
 	flag.Var(&tbFlag, "tiebreak", "Tiebreak utilisée dans les votes")
-	flag.Var(&tbFlag, "t", "Tiebreak utilisée dans les votes")
+	flag.Var(&tbFlag, "t", "Tiebreak utilisée dans les votes (raccourci)")
 
 	flag.Parse()
 

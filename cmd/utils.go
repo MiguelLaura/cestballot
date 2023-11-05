@@ -34,17 +34,49 @@ func (vf *VotersFlag) GetVoters() []string {
 	return vf.voters
 }
 
+// Permet d'acquérir les options en ligne de commande
+
+type OptFlag struct {
+	opts []int
+}
+
+func (of *OptFlag) String() string {
+	return fmt.Sprintf("%#v", of.opts)
+}
+
+func (of *OptFlag) Set(s string) error {
+	optsStr := strings.Split(s, ",")
+	opts := make([]int, len(optsStr))
+
+	for optIdx, optStr := range optsStr {
+		optConv, err := strconv.Atoi(optStr)
+
+		if err != nil {
+			log.Fatal("Une des option donnée n'est pas un entier")
+		}
+
+		opts[optIdx] = optConv
+	}
+
+	of.opts = opts
+	return nil
+}
+
+func (of *OptFlag) GetOpts() []int {
+	return of.opts
+}
+
 // Permet d'acquérir les alternatives en ligne de commande
 
 type AltFlag struct {
 	alternatives []comsoc.Alternative
 }
 
-func (vf *AltFlag) String() string {
-	return fmt.Sprintf("%#v", vf.alternatives)
+func (af *AltFlag) String() string {
+	return fmt.Sprintf("%#v", af.alternatives)
 }
 
-func (vf *AltFlag) Set(s string) error {
+func (af *AltFlag) Set(s string) error {
 	altsStr := strings.Split(s, ",")
 	alts := make([]comsoc.Alternative, len(altsStr))
 
@@ -58,13 +90,13 @@ func (vf *AltFlag) Set(s string) error {
 		alts[altIdx] = comsoc.Alternative(altConv)
 	}
 
-	vf.alternatives = alts
+	af.alternatives = alts
 	return nil
 }
 
-func (vf *AltFlag) GetAlts() []comsoc.Alternative {
-	if vf.alternatives == nil {
+func (af *AltFlag) GetAlts() []comsoc.Alternative {
+	if af.alternatives == nil {
 		return []comsoc.Alternative{4, 2, 3, 5, 9, 8, 7, 1, 6, 11, 12, 10}
 	}
-	return vf.alternatives
+	return af.alternatives
 }
