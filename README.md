@@ -32,8 +32,8 @@ Les méthodes de vote suivantes ont été implémentées :
 Les différents scripts suivants se trouvent dans cmd/ :
 * [launch-rsa](#launch-rsa) : lance le serveur
 * [launch-rba](#launch-rba) : lance un ballot
-* [launch-rva](#launch-rva) : lance un voter
-* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voters (les ballotes ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voter votent dans un seul ballot décidé aléatoirement)
+* [launch-rva](#launch-rva) : lance un voter et vote
+* [launch-all-agt](#launch-all-agt) : lance le serveur, des ballots et des voters et attend pour le résultat (les ballotes ont tous les mêmes candidats, tieBreak et voter mais ont des règles et deadlines différentes; les voter votent dans un seul ballot décidé aléatoirement)
 
 ## Détail des commandes
 
