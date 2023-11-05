@@ -37,6 +37,9 @@ Il y a 4 commandes se trouvent dans `cmd/` :
 
 ## Installation
 
+Le projet peut être récupéré avec go en utilisant la commande suivante :   
+`go get gitlab.utc.fr/mennynat/ia04-tp`
+
 Les scripts ci-dessus peuvent être installé à l'aide d'un `go install ./cmd/<nom_launcher>` afin d'en faire des executables utilisables de la même manière que décrit ci-dessous.
 
 ### Détail des commandes
